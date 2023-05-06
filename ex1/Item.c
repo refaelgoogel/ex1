@@ -3,7 +3,7 @@
 
 Item ItemCreate(void *data){
 
-    Item new_item = malloc(sizeof(*new_item));
+    Item new_item = (Item)malloc(sizeof(*new_item));
 
     if (new_item == NULL){
 

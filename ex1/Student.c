@@ -59,6 +59,8 @@ Student studentCreate(char *fileLine){
 
   new_student->department = token;
 
+  return new_student;
+
 }   
 
 

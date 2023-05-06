@@ -3,12 +3,12 @@
 
 Hacker HackerCreate(Student *students,char **fileLine){
 
-    if (fileLine == NULL || strlen(fileLine) == 0 || students == NULL) {
+    if (fileLine == NULL || students == NULL) {
 		
 		return NULL;
 	}
 
-    Hacker new_hacker = malloc(sizeof(*new_hacker));
+    Hacker new_hacker = (Hacker)malloc(sizeof(*new_hacker));
 
     if (new_hacker == NULL){
     
@@ -17,7 +17,7 @@ Hacker HackerCreate(Student *students,char **fileLine){
 
     char* first_line = fileLine[0]; 
 	
-	char *token = strtok(fileLine[0], " ");
+	char *token = strtok(first_line, " ");
 		
 	if (token == NULL){return NULL;}
 
@@ -60,7 +60,7 @@ Hacker HackerCreate(Student *students,char **fileLine){
 
     secondLine = fileLine[1];
 
-    new_hacker->wantedCoursesID = malloc(sizeof(char*)*(numberWantedCourses+1));
+    new_hacker->wantedCoursesID = (char**)malloc(sizeof(char*)*(numberWantedCourses+1));
 
     if (new_hacker->wantedCoursesID == NULL){
 
@@ -98,7 +98,7 @@ Hacker HackerCreate(Student *students,char **fileLine){
 
     thirdLine = fileLine[2];
 
-    new_hacker->friends = malloc(sizeof(Student)*(numberFriends+1));
+    new_hacker->friends = (Student*)malloc(sizeof(Student)*(numberFriends+1));
 
     if (new_hacker->friends == NULL){
 
@@ -113,7 +113,7 @@ Hacker HackerCreate(Student *students,char **fileLine){
 
     flag = false;
 
-    int i = 0;
+    i = 0;
 
     while (token != NULL && strlen(token) > 0){
 
@@ -149,7 +149,7 @@ Hacker HackerCreate(Student *students,char **fileLine){
 
     int numberRivals = 0;
 
-    token = strtok(thirdLine, " ");
+    token = strtok(fourthLine, " ");
 
     while (token != NULL && strlen(token) > 0){
 
@@ -159,7 +159,7 @@ Hacker HackerCreate(Student *students,char **fileLine){
 
     fourthLine = fileLine[3];
 
-    new_hacker->rivals = malloc(sizeof(Student)*(numberRivals+1));
+    new_hacker->rivals = (Student*)malloc(sizeof(Student)*(numberRivals+1));
 
     if (new_hacker->rivals == NULL){
 
@@ -169,7 +169,7 @@ Hacker HackerCreate(Student *students,char **fileLine){
     new_hacker->rivals[numberRivals] = NULL;
     new_hacker->numberRival = numberRivals;
 
-    token = strtok(thirdLine, " ");
+    token = strtok(fourthLine, " ");
 
     flag = false;
     i = 0;
@@ -208,7 +208,6 @@ Hacker HackerCreate(Student *students,char **fileLine){
 
 }
 
-Hacker update
 
 void HackerDestroy(Hacker hacker){
 

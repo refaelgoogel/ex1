@@ -1,12 +1,12 @@
 #ifndef HACKER_ENROLLMENT_H
 #define HACKER_ENROLLMENT_H
 
-#include "IsraeliQueue.h"
-#include "IsraeliQueue.c"
 #include "CourseQueue.h"
-#include "CourseQueue.c"
 #include "Hacker.h"
 #include <stdbool.h>
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
 
 typedef struct EnrollmentSystem
 {
@@ -17,6 +17,7 @@ typedef struct EnrollmentSystem
     Student *students;
     Hacker *hackers;
     int numberCourses;
+    bool nameFlag;
     
 } *enrollmentSystem;
 
@@ -44,13 +45,19 @@ bool ifCourseExist(int courseNumber);
 bool ifHackerGetCourse(CourseQueue courseQueue ,Hacker h);
 int returnIndexOfCourseByID(CourseQueue *courseQueue, char *courseID);
 int comparisonRequireToAccept(int requireCourses, int accepteCourses);
-bool getHackerInToTheRequiredCourses(Hacker h, CourseQueue *courseQueue);
+bool getHackerInToTheRequiredCourses(CourseQueue *courseQueue, Hacker hacker);
+ void SetNameFlag(enrollmentSystem sys, bool flag);
 
+int friendshipMeasureByFile(void *hacker, void* student);
+int friendshipMeasureByID(void *hacker, void* student);
+int friendshipMeasureByName(void *hacker, void* student);
+int ItemsComparisonFunction(void *student1, void *student2);
+CourseQueue* readFileCourses(FILE *coursesFile, int coursesNum, CourseQueue *coursesQueue);
+Student* readFileStudent(FILE *studentFile, int studentNum, Student *students);
+Hacker* readFileHackers(FILE *hackerFile, int HackerNum, Hacker *hackers, Student *students);
+int returnDiffAsciiName(char* hackerName, char* studentName);
+int GetLinesNum(FILE *file);
 
-
-
-
-// adding some help functions
 
 
 

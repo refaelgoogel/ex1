@@ -3,204 +3,126 @@
 #include <stdbool.h>
 #include <string.h>
 #include <math.h>
-#include "Item.h"
-#include "IsraeliQueue.h"
-
-int f1(void *a, void *b);
-int f2(void *a, void *b);
-int f3(void *a, void *b);
-int f4(void *a, void *b);
-int comparision(void *a, void *b);
-
+#include "HackerEnrollment.h"
 
 int main(int argc, char *argv[]){
 
-    FriendshipFunction *FunctionArr = malloc(sizeof(FunctionArr)*5);
+    if (argc > 7 || argc < 6){ printf("bad parameters\n"); return 1;}
 
-    if (FunctionArr == NULL){
+    bool nameFlag = false;
+    char *studentsPath = NULL, *coursesPath = NULL, *hackersPath = NULL, *queuesPath = NULL, *targetPath = NULL;
 
-        return -1;
-    }
+    if (strcmp(argv[1], "-i") == 0){nameFlag = true;}
 
-    FunctionArr[0] = &f1;
-    FunctionArr[1] = &f2;
-    FunctionArr[2] = &f3;
-    FunctionArr[3] = &f4;
-	FunctionArr[4] = NULL;
+    if (nameFlag){
 
-    ComparisonFunction comp = comparision;
+        for (int i = 2; i < argc; i++){
 
-    IsraeliQueue q = IsraeliQueueCreate(FunctionArr, comp, 5, 3);
+            switch (i){
 
-    if (q == NULL){
-
-        return -1;
-    }
-	
-	int a1 = 0;
-	int a2 = 1;
-	int a3 = 2;
-	int a4 = 3;
-	int a5 = 4;
-	int a6 = 5;
-	int a7 = 6;
-	int a8 = 7;
-	int a9 = 8;
-	int a10 = 9;
-	
-	
-    IsraeliQueueEnqueue(q, &a1);
-    IsraeliQueueEnqueue(q, &a2);
-    IsraeliQueueEnqueue(q, &a3);
-    IsraeliQueueEnqueue(q, &a4);
-    IsraeliQueueEnqueue(q, &a5);
-    IsraeliQueueEnqueue(q, &a6);
-    IsraeliQueueEnqueue(q, &a7);
-    IsraeliQueueEnqueue(q, &a8);
-    IsraeliQueueEnqueue(q, &a9);
-    IsraeliQueueEnqueue(q, &a10);
-
-
-    for (int i = 0; i < 10; i++){
-
-        printf("%d\n", (*(int*)IsraeliQueueDequeue(q)));
-    }
-	
-	IsraeliQueueEnqueue(q, &a1);
-    IsraeliQueueEnqueue(q, &a2);
-    IsraeliQueueEnqueue(q, &a3);
-    IsraeliQueueEnqueue(q, &a4);
-    IsraeliQueueEnqueue(q, &a5);
-    IsraeliQueueEnqueue(q, &a6);
-    IsraeliQueueEnqueue(q, &a7);
-    IsraeliQueueEnqueue(q, &a8);
-    IsraeliQueueEnqueue(q, &a9);
-    IsraeliQueueEnqueue(q, &a10);
-	
-	IsraeliQueueImprovePositions(q);
-
-	for (int i = 0; i < 10; i++){
-
-        printf("%d\n", (*(int*)IsraeliQueueDequeue(q)));
-    }
-
-    IsraeliQueueDestroy(q);
-    free(FunctionArr);
-    return 0;
-}
-
-
-int f1(void *a, void *b){// a and b are int pointers
-
-	printf("f1\n");
-	
-	
-	if (a == NULL || b == NULL){
-
-        return -1;
+                case 2:
+                    studentsPath = argv[i];
+                    break;
+                case 3:
+                    coursesPath = argv[i];
+                    break;
+                case 4:
+                    hackersPath = argv[i];
+                    break;
+                case 5:
+                    queuesPath = argv[i];
+                    break;
+                case 6:
+                    targetPath = argv[i];
+                    break;
+                default:
+                    break;
+            }
+        }
 
     }else{
 
-        int A = *(int*)a;
-        int B = *(int*)b;
-		
-		if (B == 0){return 0;}
-		
-		return (A+B);
-		
-	}
+        for (int i = 1; i < argc; i++){
 
+            switch (i){
 
-}
-
-int f2(void *a, void *b){// a and b are int pointers
-
-	printf("f2\n");
-	
-    
-	if (a == NULL || b == NULL){
-
-        return -1;
-
-    }else{
-
-        int A = *(int*)a;
-        int B = *(int*)b;
-		
-		if (B == 0){return 0;}
-		
-		return (A-B);
-		
-	}
-
-
-}
-
-int f3(void *a, void *b){// a and b are int pointers
-
-	printf("f3\n");
-	
-	
-	
-	if (a == NULL || b == NULL){
-
-        return -1;
-
-    }else{
-
-        int A = *(int*)a;
-        int B = *(int*)b;
-		
-		if (B == 0){return 0;}
-		
-		return (A*B);
-		
-	}
-
-
-}
-
-int f4(void *a, void *b){// a and b are int pointers
-
-	printf("f4\n");
-
-	if (a == NULL || b == NULL){
-
-        return -1;
-
-    }else{
-
-        int A = *(int*)a;
-        int B = *(int*)b;
-		
-		if (B == 0){return 0;}
-		
-		return (A/B);
-		
-	}
-
-}
-
-int comparision(void *a, void *b){
-
-    if (a == NULL || b == NULL){
-
-        return -1;
-
-    }else{
-
-        int A = *(int*)a;
-        int B = *(int*)b;
-
-        if (A > B){
-
-            return A;
-
-        }else{
-            
-            return B;
+                case 1:
+                    studentsPath = argv[i];
+                    break;
+                case 2:
+                    coursesPath = argv[i];
+                    break;
+                case 3:
+                    hackersPath = argv[i];
+                    break;
+                case 4:
+                    queuesPath = argv[i];
+                    break;
+                case 5:
+                    targetPath = argv[i];
+                    break;
+                default:
+                    break;
+            }
         }
 
     }
 
+    // Check if all arguments have been provided
+    if (!studentsPath || !coursesPath || !hackersPath || !queuesPath || !targetPath) {
+
+        // error
+        return 1;
+    }
+
+    // Open files
+
+    FILE *studentsFile = fopen(studentsPath, "r");
+    FILE *coursesFile = fopen(coursesPath, "r");
+    FILE *hackersFile = fopen(hackersPath, "r");
+    FILE *queuesFile = fopen(queuesPath, "r");
+    FILE *targetFile = fopen(targetPath, "w");
+
+
+
+    if (studentsFile == NULL || coursesFile == NULL || hackersFile == NULL || queuesFile == NULL || targetFile == NULL) {
+
+        // error
+        return 1;
+    }
+
+    enrollmentSystem enSystem = createEnrollmentSystem(studentsFile, coursesFile, hackersFile);
+
+    if (enSystem == NULL){
+
+        // error
+        return 1;
+    }
+
+    SetNameFlag(enSystem, nameFlag);
+    readEnrollment(enSystem, queuesFile);
+    hackEnrollment(enSystem, targetFile);
+
+    // close files 
+
+    int result1 = fclose(studentsFile);
+    int result2 = fclose(coursesFile);
+    int result3 = fclose(hackersFile);
+    int result4 = fclose(queuesFile);
+    int result5 = fclose(targetFile);
+
+    if (result1 == EOF || result2 == EOF || result3 == EOF || result4 == EOF || result5 == EOF){
+
+        // error
+        return 1;
+    }
+
+    // free things
+    free(enSystem);
+
+
+    return 0;
 }
+
+
+

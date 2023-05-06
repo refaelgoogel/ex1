@@ -1,6 +1,7 @@
+#include "Item.h"
 #include <math.h>
 #include "IsraeliQueue.h"
-#include "Item.h"
+
 
 #define FRIENDS_PASS_LIMIT 5
 #define RIVAL_BLOCK_PASS_LIMIT 3
@@ -12,11 +13,11 @@ int IfEnemyBlocked(IsraeliQueue q, int friendIndex, int itemIndex);
 bool ifAllItemsMerged(IsraeliQueue *qs);
 void MarkAsUnmerged(IsraeliQueue *qs);
 IsraeliQueueError ReallocateMoreSpace(IsraeliQueue q);
+IsraeliQueueError IsraeliQueueEnqueueInOrder(IsraeliQueue q, void *item);
 
 
 struct IsraeliQueue_t{
 
-    
     FriendshipFunction *friendship_functions;
     int size_of_friendship_functions;
     ComparisonFunction comparison_function; 
@@ -29,14 +30,12 @@ struct IsraeliQueue_t{
 
 };
     
-
-
 /**Creates a new IsraeliQueue_t object with the provided friendship functions, a NULL-terminated array,
  * comparison function, friendship threshold and rivalry threshold. Returns a pointer
  * to the new object. In case of failure, return NULL.*/
 IsraeliQueue IsraeliQueueCreate(FriendshipFunction *friendshipFunctions, ComparisonFunction comparisonFunction, int friendship_th, int rivalry_th){
 
-    IsraeliQueue new_queue = malloc(sizeof(*new_queue));
+    IsraeliQueue new_queue = (IsraeliQueue)malloc(sizeof(*new_queue));
 
     if (new_queue == NULL){
 
@@ -52,7 +51,7 @@ IsraeliQueue IsraeliQueueCreate(FriendshipFunction *friendshipFunctions, Compari
     
 	printf("sarting!!!!! size of Friendship Function is %d\n",i);
 	
-    new_queue->friendship_functions = malloc(sizeof(FriendshipFunction) * (i+1));
+    new_queue->friendship_functions = (FriendshipFunction*)malloc(sizeof(FriendshipFunction) * (i+1));
 
     if (new_queue->friendship_functions == NULL){
 
@@ -73,7 +72,7 @@ IsraeliQueue IsraeliQueueCreate(FriendshipFunction *friendshipFunctions, Compari
     new_queue->friendship_threshold = friendship_th;
     new_queue->rivalry_threshold = rivalry_th;
 
-    new_queue->array = malloc(sizeof(Item) * 10);
+    new_queue->array = (Item*)malloc(sizeof(Item) * 10);
     new_queue->size_of_allocation = 10;
     new_queue->expend_base = 2;
     new_queue->size = 0;
@@ -225,7 +224,21 @@ IsraeliQueueError IsraeliQueueEnqueue(IsraeliQueue q, void *item){
 		printf("error");
         return ISRAELIQUEUE_ALLOC_FAILED;
     }
-		
+
+    // let's divided into 2 cases: 
+
+    // case 1: there is no friendship functions
+
+    if (q->size_of_friendship_functions == 0){ // enqueue like regular queue without trying to improve position
+
+        q->array[q->size] = new_item;
+        q->size++;
+        return ISRAELIQUEUE_SUCCESS;
+    }
+	
+    // if we got here, there are friendship functions (because there is return in the previous if statement)
+    // case 2: there are friendship functions
+
 	printf("the size of q is: %d\n", q->size);
 	
     if (q->size == 0){
@@ -330,6 +343,7 @@ IsraeliQueueError IsraeliQueueEnqueue(IsraeliQueue q, void *item){
 
 }
 
+
 /**@param IsraeliQueue: an IsraeliQueue to which the function is to be added
  * @param FriendshipFunction: a FriendshipFunction to be recognized by the IsraeliQueue
  * going forward.
@@ -337,7 +351,7 @@ IsraeliQueueError IsraeliQueueEnqueue(IsraeliQueue q, void *item){
  * Makes the IsraeliQueue provided recognize the FriendshipFunction provided.*/
 IsraeliQueueError IsraeliQueueAddFriendshipMeasure(IsraeliQueue q, FriendshipFunction f){
 
-    FriendshipFunction* temp = realloc(q->friendship_functions, sizeof(FriendshipFunction) * (q->size_of_friendship_functions + 1));
+    FriendshipFunction* temp = (FriendshipFunction*)realloc(q->friendship_functions, sizeof(FriendshipFunction) * (q->size_of_friendship_functions + 1));
 
     if (temp == NULL){
 
@@ -628,7 +642,7 @@ IsraeliQueue IsraeliQueueMerge(IsraeliQueue *qs ,ComparisonFunction f){
 
     }
 
-    FriendshipFunction *friendshipFunctions = malloc(sizeof(FriendshipFunction) * (sum_of_functions+1));
+    FriendshipFunction *friendshipFunctions = (FriendshipFunction*)malloc(sizeof(FriendshipFunction) * (sum_of_functions+1));
 
     if (friendshipFunctions == NULL){
 
@@ -782,7 +796,7 @@ IsraeliQueueError ReallocateMoreSpace(IsraeliQueue q){
 
     if (q->size == q->size_of_allocation){
 
-        Item *temp = realloc(q->array, sizeof(Item) * (q->size_of_allocation * q->expend_base));
+        Item *temp = (Item*)realloc(q->array, sizeof(Item) * (q->size_of_allocation * q->expend_base));
 
         if (temp == NULL){
 
@@ -795,11 +809,5 @@ IsraeliQueueError ReallocateMoreSpace(IsraeliQueue q){
     }
 
     return ISRAELIQUEUE_SUCCESS;
-}
-
-void* getData(IsraeliQueue q, int index){
-	
-	return (q->array[index]->data);
-	
 }
 
