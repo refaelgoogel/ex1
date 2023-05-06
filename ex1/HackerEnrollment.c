@@ -14,11 +14,12 @@
 int friendshipMeasureByFile(void *hacker, void* student);
 int friendshipMeasureByID(void *hacker, void* student);
 int friendshipMeasureByName(void *hacker, void* student);
+int friendshipMeasureByNameWithFlag(void *hacker, void* student);
 int ItemsComparisonFunction(void *student1, void *student2);
 CourseQueue* readFileCourses(FILE *coursesFile, int coursesNum, CourseQueue *coursesQueue);
 Student* readFileStudent(FILE *studentFile, int studentNum, Student *students);
 Hacker* readFileHackers(FILE *hackerFile, int HackerNum, Hacker *hackers, Student *students);
-int returnDiffAsciiName(char* hackerName, char* studentName);
+int returnDiffAsciiName(char* hackerName, char* studentName, bool capitalLetter);
 int GetLinesNum(FILE *file);
 int min(int a, int b);
 Student ReturnStudentFromQueueByIndex(CourseQueue courseQueue, int index);
@@ -43,7 +44,19 @@ enrollmentSystem createEnrollmentSystem(FILE* students, FILE* courses, FILE* hac
     int numberStudents = GetLinesNum(new_system->students_file);
 
     int numberHackers = GetLinesNum(new_system->hackers_file);
+
+    printf("numberCourses = %d\n", numberCourses);
+    printf("numberStudents = %d\n", numberStudents);
+    printf("numberHackers = %d\n", numberHackers);
+
+    numberCourses = GetLinesNum(new_system->courses_file);
+    numberStudents = GetLinesNum(new_system->students_file);
+
+    numberHackers = GetLinesNum(new_system->hackers_file);
+
     numberHackers = numberHackers/4; // because each hacker has 4 lines
+    
+    printf("numberHackers = %d\n", numberHackers);
 
     new_system->coursesQueue = (CourseQueue*)malloc(sizeof(CourseQueue)*(numberCourses+1));
 
@@ -85,6 +98,8 @@ enrollmentSystem createEnrollmentSystem(FILE* students, FILE* courses, FILE* hac
         }
 
     }
+
+    printf("got here! 102!\n");
 
     // finished creating CourseQueue
 
@@ -144,15 +159,16 @@ enrollmentSystem createEnrollmentSystem(FILE* students, FILE* courses, FILE* hac
   char *fileLine = NULL;
   size_t len = 0; // size_t is an unsigned integer data type
 
-  //fopen(coursesFile, "r");
 
   if (coursesFile == NULL){
 
     printf("ERROR: inside readFilesCourses line 151\n");
     return NULL;
-  }
+}
 
-  for (int i = 0; i < coursesNum; i++){
+fseek(coursesFile, 0, SEEK_SET);
+
+for (int i = 0; i < coursesNum; i++){
       
     if (getline(&fileLine, &len, coursesFile) != -1){
 
@@ -162,16 +178,16 @@ enrollmentSystem createEnrollmentSystem(FILE* students, FILE* courses, FILE* hac
     
     }else {
 
-       printf("ERROR: inside readFilesCourses line 165 round %d\n",i);
-      return NULL;
+        printf("ERROR: inside readFilesCourses line 165 round %d\n",i);
+        return NULL;
     }
-  }
+    
+}
 
-    free(fileLine); // COULD BE ERROR: maybe not need to free the memory - still need to check
-
+    fseek(coursesFile, 0, SEEK_SET);
     return coursesQueue;
 
- }
+}
 
 
  void SetNameFlag(enrollmentSystem sys, bool flag){
@@ -187,39 +203,43 @@ enrollmentSystem createEnrollmentSystem(FILE* students, FILE* courses, FILE* hac
 
 Student* readFileStudent(FILE *studentFile, int studentNum, Student *students){
 
-  if (studentFile == NULL || students == NULL) 
-  {
-      return NULL;
-  }
+    if (studentFile == NULL || students == NULL){
+        
+        return NULL;
+    }
 
-  char *fileLine = NULL;
-  size_t len = 0;
-
-  //fopen(studentFile, "r");
+char *fileLine = NULL;
+size_t len = 0;
   
-  if (studentFile == NULL){
+if (studentFile == NULL){
     
     return NULL;
-  }
+    
+}
 
-  for (int i = 0; i < studentNum; i++){
-      
-    if ((getline(&fileLine, &len, studentFile)) != -1){
 
-      students[i] = studentCreate(fileLine);
-      fileLine = NULL;
-      len = 0;
+    fseek(studentFile, 0, SEEK_SET);
 
-    }else{
 
-      return NULL;
-    } 
+    for (int i = 0; i < studentNum; i++){
+        
+        if ((getline(&fileLine, &len, studentFile)) != -1){
 
-   }
+            students[i] = studentCreate(fileLine);
+            fileLine = NULL;
+            len = 0;
 
-   free(fileLine);// COULD BE ERROR: maybe not need to free the memory - still need to check
-   return students;
- }
+        }else{
+
+        return NULL;
+        } 
+
+    }
+
+    fseek(studentFile, 0, SEEK_SET);
+    return students;
+
+}
 
 Hacker* readFileHackers(FILE *hackerFile, int hackerNum, Hacker *hackers, Student *students){
 
@@ -233,7 +253,7 @@ Hacker* readFileHackers(FILE *hackerFile, int hackerNum, Hacker *hackers, Studen
 
     char *hackerLines[5] = {NULL};
 
-    //fopen(hackerFile, "r");
+    fseek(hackerFile, 0, SEEK_SET);
 
     for (int i = 0; i < hackerNum; i++){ // hackerNum divided by 4 because each hacker has 4 lines
       
@@ -261,7 +281,7 @@ Hacker* readFileHackers(FILE *hackerFile, int hackerNum, Hacker *hackers, Studen
 
     }
 
-    free(fileLine); // do we need to free the memory? still need to check
+    fseek(hackerFile, 0, SEEK_SET);
     return hackers;
 
  }
@@ -272,6 +292,8 @@ Hacker* readFileHackers(FILE *hackerFile, int hackerNum, Hacker *hackers, Studen
     size_t len = 0;
     int read = 0;
 	int counter = 0; 
+
+    fseek(file, 0, SEEK_SET);
 
     while ((read = getline(&line, &len, file)) != -1) {
 		
@@ -288,6 +310,9 @@ Hacker* readFileHackers(FILE *hackerFile, int hackerNum, Hacker *hackers, Studen
 
     }
 	
+    fseek(file, 0, SEEK_SET);
+    free(line);
+
 	return counter;
 }
 
@@ -315,9 +340,20 @@ enrollmentSystem readEnrollment(enrollmentSystem sys, FILE* queues){
 
     FunctionArr[0] = &friendshipMeasureByFile;
     FunctionArr[1] = &friendshipMeasureByID;
-    FunctionArr[2] = &friendshipMeasureByName;
+
+    if (sys->nameFlag == true){
+
+        FunctionArr[2] = &friendshipMeasureByNameWithFlag;
+    
+    }else{
+
+        FunctionArr[2] = &friendshipMeasureByName;
+    }
+
     FunctionArr[3] = NULL;
     // end of friendship function array
+
+    fseek(queues, 0, SEEK_SET);
 
     // now we will read the file and insert the students to the courses
     while ((getline(&fileLine, &len, queues)) != -1){
@@ -350,8 +386,8 @@ enrollmentSystem readEnrollment(enrollmentSystem sys, FILE* queues){
         
     } // finished reading the file and inserting the students to the courses
 
-    free(fileLine); // COULD BE ERROR: maybe not need to free the memory - still need to check
 
+    fseek(queues, 0, SEEK_SET);
     return sys;
 }
 
@@ -539,32 +575,59 @@ int friendshipMeasureByID(void *hacker, void* student){
 }
 
 
-int returnDiffAsciiName(char* hackerName, char* studentName){
+int upperToLower(int a){
+    
+     if ( a > 64 && a < 91){
+                return (a - 34);
+            }
+    return a;
+}
+    
+
+
+int returnDiffAsciiName(char* hackerName, char* studentName, bool capitalLetter){
 	
     // check for error
 
 	int i = 0;
 	int diff = 0;
+    int hackerValueLetter = 0;
+    int studentValueLetter = 0;
 
 
     for (;i < min(strlen(hackerName),strlen(studentName)); i++){
-     
-        diff = diff + abs((int)hackerName[i]-(int)studentName[i]);
 
+            if (capitalLetter){
+             hackerValueLetter = upperToLower((int)hackerName[i]);
+             studentValueLetter = upperToLower((int)studentName[i]);
+            }
+
+        diff = diff + abs(studentValueLetter-hackerValueLetter);
     }
-
+    
     if (strlen(hackerName) < strlen(studentName)){
 
         while (i <= strlen(studentName)){
 
-            diff = diff + abs((int)studentName[i]);
+            if (capitalLetter){
+               studentValueLetter = upperToLower((int)studentName[i]);
+
+            diff = diff + studentValueLetter;
             i++;
         }
-    }else {
+        }
+    }
+     else {
 
         while (i <= strlen(hackerName)){
+             
+             if (capitalLetter){
+            
+             hackerValueLetter = upperToLower((int)hackerName[i]);
+            
+             }  
 
-            diff = diff + abs((int)hackerName[i]);
+            diff = diff + hackerValueLetter;
             i++;
 
         }
@@ -588,8 +651,19 @@ int friendshipMeasureByName(void *hacker, void* student){
 
     Hacker h = (Hacker)hacker;
     Student s = (Student)student;
-    int diffName = returnDiffAsciiName(h->hacker->name, s->name);
-    int diffSurname = returnDiffAsciiName(h->hacker->surname, s->surname);
+    int diffName = returnDiffAsciiName(h->hacker->studentID, s->studentID, false);
+    int diffSurname = returnDiffAsciiName(h->hacker->surname, s->surname, false);
+
+    return (diffName+diffSurname);  
+
+}
+
+int friendshipMeasureByNameWithFlag(void *hacker, void* student){
+
+    Hacker h = (Hacker)hacker;
+    Student s = (Student)student;
+    int diffName = returnDiffAsciiName(h->hacker->studentID, s->studentID, true);
+    int diffSurname = returnDiffAsciiName(h->hacker->surname, s->surname, true);
 
     return (diffName+diffSurname);  
 

@@ -83,8 +83,6 @@ int main(int argc, char *argv[]){
     FILE *queuesFile = fopen(queuesPath, "r");
     FILE *targetFile = fopen(targetPath, "w");
 
-
-
     if (studentsFile == NULL || coursesFile == NULL || hackersFile == NULL || queuesFile == NULL || targetFile == NULL) {
 
         // error

@@ -208,7 +208,6 @@ Hacker HackerCreate(Student *students,char **fileLine){
 
 }
 
-
 void HackerDestroy(Hacker hacker){
 
     if (hacker == NULL){
