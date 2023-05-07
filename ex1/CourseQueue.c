@@ -21,7 +21,7 @@ CourseQueue CourseQueueCreate(char *fileLine){
 	char *token = strtok(fileLine, " ");
 		
 	if (token == NULL){return NULL;}
-		
+	
 	new_CourseQueue->courseID = token;
 			
     token = strtok(NULL, " ");
@@ -68,6 +68,9 @@ CourseQueue InsertStudentsToCourseQueue(CourseQueue courseQueue, char *fileLine,
 
 			FixToken(students[i]->studentID);
 			FixToken(token);
+
+			printf("student id is %s\n", students[i]->studentID);
+			printf("token is %s\n", token);
 
 			if (strcmp(students[i]->studentID, token) == 0){ // we found the student
 

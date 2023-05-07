@@ -95,18 +95,28 @@ Hacker HackerCreate(Student *students,char **fileLine){
 
     while (token != NULL && strlen(token) > 0){
 
-        FixToken(token);
+        printf("token is %s\n", token);
         new_hacker->wantedCoursesID[i] = token;
         token = strtok(NULL, " ");
         i++;
     }
 
-    free (secondLineCopy);
+    //free(secondLineCopy);
     // now we have the wanted courses ID and the number of wanted courses
 
     // now let's find the hacker's friends
 
     char *thirdLine = fileLine[2];
+    char *thirdLineCopy = (char*)malloc(sizeof(char)*(strlen(thirdLine)+1));
+    strcpy(thirdLineCopy, thirdLine);
+
+    printf("third line is %s\n", thirdLine);
+    printf("third line copy is %s\n", thirdLineCopy);
+
+    if (thirdLineCopy == NULL){
+
+        return NULL;
+    }
 
     int numberFriends = 0;
 
@@ -118,7 +128,7 @@ Hacker HackerCreate(Student *students,char **fileLine){
         token = strtok(NULL, " ");
     }
 
-    thirdLine = fileLine[2];
+    thirdLine = thirdLineCopy;
 
     new_hacker->friends = (Student*)malloc(sizeof(Student)*(numberFriends+1));
 
@@ -175,12 +185,19 @@ Hacker HackerCreate(Student *students,char **fileLine){
         token = strtok(NULL, " ");
     }
 
+    //free (thirdLineCopy);
+
 
     // now we have the hacker's friends
 
     // now let's find the hacker's enemies
 
     char *fourthLine = fileLine[3];
+    char *fourthLineCopy = (char*)malloc(sizeof(char)*(strlen(fourthLine)+1));
+    strcpy(fourthLineCopy, fourthLine);
+
+    printf("fourth line is %s\n", fourthLine);
+    printf("fourth line copy is %s\n", fourthLineCopy);
 
     int numberRivals = 0;
 
@@ -196,7 +213,7 @@ Hacker HackerCreate(Student *students,char **fileLine){
         token = strtok(NULL, " ");
     }
 
-    fourthLine = fileLine[3];
+    fourthLine = fourthLineCopy;
 
     new_hacker->rivals = (Student*)malloc(sizeof(Student)*(numberRivals+1));
 
@@ -256,6 +273,8 @@ Hacker HackerCreate(Student *students,char **fileLine){
     }
 
     // now we have the hacker's enemies
+
+    //free(fourthLineCopy);
 
 
     new_hacker->gotCourseNum = 0;

@@ -357,9 +357,9 @@ enrollmentSystem readEnrollment(enrollmentSystem sys, FILE* queues){
         return NULL;
     }
 
-    //printf("******************** system before adding students to courses ********************\n");
-    //PrintSystem(sys);
-    //printf("*********************************************************************************\n");
+    printf("******************** system before adding students to courses ********************\n");
+    PrintSystem(sys);
+    printf("*********************************************************************************\n");
 
     char *fileLine = NULL;
     size_t len = 0;
@@ -405,16 +405,19 @@ enrollmentSystem readEnrollment(enrollmentSystem sys, FILE* queues){
         char *courseID = strtok(fileLine, " ");
         FixToken(courseID);
 
-
+        printf("courseID: %s\n", courseID);
         //int i = 0;
         
         int indexOfCourse = returnIndexOfCourseByID(sys->coursesQueue, courseID, sys->numberCourses);
+
+        printf("index of course: %d\n", indexOfCourse);
 
         if (indexOfCourse == -1){
 
             return NULL;
         }
         
+        printf("temp: %s\n", temp);
         if (InsertStudentsToCourseQueue(sys->coursesQueue[indexOfCourse], temp, sys->students, sys->numberStudents) == NULL){
 
             return NULL;
@@ -551,6 +554,8 @@ void hackEnrollment(enrollmentSystem sys, FILE* out){
 
 int returnIndexOfCourseByID(CourseQueue *courseQueue, char *courseID, int courseNum){
 
+    
+    printf("coursesnum = %d\n",courseNum);
     if (courseID == NULL || courseQueue == NULL || strlen(courseID) == 0){
 
         return -1;
@@ -638,6 +643,8 @@ bool getHackerInToTheRequiredCourses(CourseQueue *courseQueue, Student hacker,ch
     
         coursePlace = returnIndexOfCourseByID(courseQueue, wantedCourseID[i],coursesNum);
 
+        printf("coursePlace = %d\n",coursePlace);
+
         if (coursePlace == -1){
             
             
@@ -645,6 +652,8 @@ bool getHackerInToTheRequiredCourses(CourseQueue *courseQueue, Student hacker,ch
             printf("error in returnIndexOfCourseByID\n");
             return false;
         }
+
+        
 
         if (IsraeliQueueEnqueue(courseQueue[coursePlace]->studentQueue, hacker) != ISRAELIQUEUE_SUCCESS){
             

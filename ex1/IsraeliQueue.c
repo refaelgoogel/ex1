@@ -258,13 +258,14 @@ IsraeliQueueError IsraeliQueueEnqueue(IsraeliQueue q, void *item){
 
     // case 1: there is no friendship functions
 
-    
+    printf("Line 261\n");
 
     if (q->size_of_friendship_functions == 0){ // enqueue like regular queue without trying to improve position
 
         printf("-----------no friendship functions ------ ");
         q->array[q->size] = new_item;
         q->size++;
+        printf("Line 268\n");
         return ISRAELIQUEUE_SUCCESS;
     }
 	
