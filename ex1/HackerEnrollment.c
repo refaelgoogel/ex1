@@ -17,9 +17,9 @@ int friendshipMeasureByID(void *hacker, void* student);
 int friendshipMeasureByName(void *hacker, void* student);
 int friendshipMeasureByNameWithFlag(void *hacker, void* student);
 int ItemsComparisonFunction(void *student1, void *student2);
-CourseQueue* readFileCourses(FILE *coursesFile, int coursesNum, CourseQueue *coursesQueue);
+CourseQueue* readFileCourses(FILE* coursesFile, int coursesNum, CourseQueue *coursesQueue);
 Student* readFileStudent(FILE *studentFile, int studentNum, Student *students);
-Hacker* readFileHackers(FILE *hackerFile, int HackerNum, Hacker *hackers, Student *students);
+Hacker* readFileHackers(FILE *hackerFile, int hackerNum, Hacker *hackers, Student *students, int studentNum);
 int returnDiffAsciiName(char* hackerName, char* studentName, bool capitalLetter);
 int GetLinesNum(FILE *file);
 int min(int a, int b);
@@ -151,7 +151,7 @@ enrollmentSystem createEnrollmentSystem(FILE* students, FILE* courses, FILE* hac
 
     // malloc OK
     
-    new_system->hackers = readFileHackers(new_system->hackers_file, numberHackers,new_system->hackers ,new_system->students);
+    new_system->hackers = readFileHackers(new_system->hackers_file, numberHackers,new_system->hackers ,new_system->students, numberStudents);
 
     if (new_system->hackers == NULL){
 
@@ -264,11 +264,10 @@ Student* readFileStudent(FILE *studentFile, int studentNum, Student *students){
 
 }
 
-Hacker* readFileHackers(FILE *hackerFile, int hackerNum, Hacker *hackers, Student *students){
+Hacker* readFileHackers(FILE *hackerFile, int hackerNum, Hacker *hackers, Student *students, int studentNum){
 
     if (hackerFile == NULL || hackers == NULL){
 
-        printf("ERROR!, LINE 271\n");
         return NULL;
     }
 
@@ -291,19 +290,17 @@ Hacker* readFileHackers(FILE *hackerFile, int hackerNum, Hacker *hackers, Studen
 
             }else {
                 
-                printf("ERROR!, LINE 294\n");
                 return NULL;
             }
 
         } 
 
         //printf("create hacker function returns:\n");
-        hackers[i] = HackerCreate(students,hackerLines);
+        hackers[i] = HackerCreate(students,hackerLines, studentNum);
         //PrintHacker(hackers[i]);
 
         if (hackers[i] == NULL){
             
-            printf("ERROR!, LINE 306\n");
             return NULL;
         }
 
@@ -405,19 +402,16 @@ enrollmentSystem readEnrollment(enrollmentSystem sys, FILE* queues){
         char *courseID = strtok(fileLine, " ");
         FixToken(courseID);
 
-        printf("courseID: %s\n", courseID);
         //int i = 0;
         
         int indexOfCourse = returnIndexOfCourseByID(sys->coursesQueue, courseID, sys->numberCourses);
 
-        printf("index of course: %d\n", indexOfCourse);
 
         if (indexOfCourse == -1){
 
             return NULL;
         }
         
-        printf("temp: %s\n", temp);
         if (InsertStudentsToCourseQueue(sys->coursesQueue[indexOfCourse], temp, sys->students, sys->numberStudents) == NULL){
 
             return NULL;
@@ -480,18 +474,14 @@ void hackEnrollment(enrollmentSystem sys, FILE* out){
 
     for (; i < sys->numberHackers; i++){
     
-        printf("PPPPPPPPPPPPPPPPPPPPhacker %s has %d wanted courses\n",sys->hackers[i]->hacker->studentID, sys->hackers[i]->wantedCoursesNum);
 
         for (; j < sys->hackers[i]->wantedCoursesNum; j++){
 
-            printf("wanted course id = %s\n",sys->hackers[i]->wantedCoursesID[j]);       
             index = returnIndexOfCourseByID(sys->coursesQueue, sys->hackers[i]->wantedCoursesID[j], sys->numberCourses);
-            printf("index of wanted course = %d\n",index);
 
             if (ifHackerGetCourse(sys->coursesQueue[index] ,sys->hackers[i]) == true){
 
                 sys->hackers[i]->gotCourseNum++;
-                printf("hacker got course!\n");
             }
 
 
@@ -512,7 +502,6 @@ void hackEnrollment(enrollmentSystem sys, FILE* out){
     
         int compared = comparisonRequireToAccept(sys->hackers[i]->wantedCoursesNum, sys->hackers[i]->gotCourseNum);
 
-        printf("compared = %d\n",compared);
 
         if (compared == 0 || compared == -1){// then there is a problem
 
@@ -555,7 +544,6 @@ void hackEnrollment(enrollmentSystem sys, FILE* out){
 int returnIndexOfCourseByID(CourseQueue *courseQueue, char *courseID, int courseNum){
 
     
-    printf("coursesnum = %d\n",courseNum);
     if (courseID == NULL || courseQueue == NULL || strlen(courseID) == 0){
 
         return -1;
@@ -597,7 +585,6 @@ bool ifHackerGetCourse(CourseQueue courseQueue ,Hacker hacker){
         return false;
     }
 
-    printf("original and cloned queue before:\n");
     PrintIsraeliQueue(courseQueue->studentQueue);
     PrintIsraeliQueue(tempQueue);
 
@@ -643,7 +630,6 @@ bool getHackerInToTheRequiredCourses(CourseQueue *courseQueue, Student hacker,ch
     
         coursePlace = returnIndexOfCourseByID(courseQueue, wantedCourseID[i],coursesNum);
 
-        printf("coursePlace = %d\n",coursePlace);
 
         if (coursePlace == -1){
             

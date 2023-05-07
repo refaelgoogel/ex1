@@ -48,8 +48,6 @@ CourseQueue InsertStudentsToCourseQueue(CourseQueue courseQueue, char *fileLine,
 		return NULL;
 	}
 
-	printf("file line is %s\n", fileLine);
-
 	char *token = strtok(fileLine, " ");
 		
 	if (token == NULL || strlen(token) == 0){return NULL;}
@@ -68,10 +66,7 @@ CourseQueue InsertStudentsToCourseQueue(CourseQueue courseQueue, char *fileLine,
 
 			FixToken(students[i]->studentID);
 			FixToken(token);
-
-			printf("student id is %s\n", students[i]->studentID);
-			printf("token is %s\n", token);
-
+		
 			if (strcmp(students[i]->studentID, token) == 0){ // we found the student
 
 				IsraeliQueueEnqueue(courseQueue->studentQueue, students[i]); // insert the student to the course queue

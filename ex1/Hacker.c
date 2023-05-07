@@ -1,10 +1,9 @@
 #include "Hacker.h"
 #include "Student.h"
 
+Hacker HackerCreate(Student *students,char **fileLine, int studentNum){
 
-Hacker HackerCreate(Student *students,char **fileLine){
-
-    if (fileLine == NULL || students == NULL) {
+    if (fileLine == NULL || students == NULL){
 		
 		return NULL;
 	}
@@ -18,19 +17,95 @@ Hacker HackerCreate(Student *students,char **fileLine){
 
     char* first_line = fileLine[0]; 
 
-	
-	char *token = strtok(first_line, " ");
+    new_hacker = FirstLineFunction(new_hacker, first_line, studentNum,students);
 
+    if (new_hacker->hacker == NULL){
+
+        return NULL;
+    }
+	
+    // now we have the student
+    // le'ts get the wanted courses
+    // count the number of wanted courses
+
+
+    char *secondLine = fileLine[1];
+
+    new_hacker = SecondLineFunction(new_hacker, secondLine);
+
+    if (new_hacker == NULL){
+
+        return NULL;
+    }
+
+
+    // now we have the wanted courses ID and the number of wanted courses
+    // now let's find the hacker's friends
+
+    char *thirdLine = fileLine[2];
+
+    new_hacker = ThirdLineFunction(new_hacker, thirdLine, students);
+
+    if (new_hacker == NULL){
+
+        return NULL;
+    }
+
+    //free (thirdLineCopy);
+    // now we have the hacker's friends
+    // now let's find the hacker's enemies
+
+    char *fourthLine = fileLine[3];
+
+    new_hacker = FourthLineFunction(new_hacker, fourthLine, students);
+
+    if (new_hacker == NULL){
+
+        return NULL;
+    }
+
+    // now we have the hacker's enemies
+
+    new_hacker->gotCourseNum = 0;
+
+    // hacker created! 
+
+    printf("hacker created!\n");    
+    
+    return new_hacker;
+
+}
+
+Hacker FirstLineFunction(Hacker new_hacker ,char *firstLine, int studentNum, Student *students){
+
+    if (firstLine == NULL || new_hacker == NULL){
+
+        return NULL;
+    }
+
+    char *CopyFirstLine = (char*)malloc(sizeof(char)*(strlen(firstLine)+1));
+    strcpy(CopyFirstLine, firstLine);
+
+    if (CopyFirstLine == NULL){
+
+        return NULL;
+    }
+
+    char *token = strtok(CopyFirstLine, " ");
 		
-	if (token == NULL){return NULL;}
+	if (token == NULL){
+
+        free(CopyFirstLine);
+        return NULL;
+    }
 
     FixToken(token);
 
-    int i = 0; 
+    int i = 0;
     bool flag = false;
 
-    while (students[i] != NULL){
-
+    for (i = 0; i < studentNum; i++){
+        
         if (strcmp(students[i]->studentID, token) == 0){
             
             new_hacker->hacker = students[i];
@@ -38,102 +113,96 @@ Hacker HackerCreate(Student *students,char **fileLine){
             flag = true;
             break;
         }
-
-        i++;
-
     }
 
     if (!flag){
 
+        free(CopyFirstLine);
         return NULL;
     }
 
-    // now we have the student
-
-    // le'ts get the wanted courses
-
-    // count the number of wanted courses
+    return new_hacker;
 
 
-    char *secondLine = fileLine[1];
-    char *secondLineCopy = (char*)malloc(sizeof(char)*(strlen(secondLine)+1));
-    strcpy(secondLineCopy, secondLine);
+}
 
-    if (secondLineCopy == NULL){
+Hacker SecondLineFunction(Hacker new_hacker, char *SecondLine){
+    
+    if (SecondLine == NULL || new_hacker == NULL){
 
         return NULL;
     }
 
-    int numberWantedCourses = 0;
+    char *CopySecondLine = (char*)malloc(sizeof(char)*(strlen(SecondLine)+1));
+    strcpy(CopySecondLine, SecondLine);
 
-    token = strtok(secondLine, " ");
-    FixToken(token);
+    if (CopySecondLine == NULL){
 
-    while (token != NULL && strlen(token) > 0){
-
-        numberWantedCourses++;
-        token = strtok(NULL, " ");
+        return NULL;
     }
 
-    secondLine = secondLineCopy;
-    printf("second line is %s\n", secondLine);
+    int numberWantedCourses = GetNumberSafe(CopySecondLine);
+
+    if (numberWantedCourses == -1){
+
+        free(CopySecondLine);
+        return NULL;
+    }
 
     new_hacker->wantedCoursesID = (char**)malloc(sizeof(char*)*(numberWantedCourses+1));
 
     if (new_hacker->wantedCoursesID == NULL){
 
+        free(CopySecondLine);
         return NULL;
     }
 
     new_hacker->wantedCoursesID[numberWantedCourses] = NULL;
     new_hacker->wantedCoursesNum = numberWantedCourses;
 
-    token = strtok(secondLine, " ");
+    char *token = strtok(CopySecondLine, " ");
 
-
-    i = 0;
+    int i = 0;
 
     while (token != NULL && strlen(token) > 0){
 
-        printf("token is %s\n", token);
         new_hacker->wantedCoursesID[i] = token;
         token = strtok(NULL, " ");
         i++;
     }
 
-    //free(secondLineCopy);
-    // now we have the wanted courses ID and the number of wanted courses
+    return new_hacker;
 
-    // now let's find the hacker's friends
+}
 
-    char *thirdLine = fileLine[2];
-    char *thirdLineCopy = (char*)malloc(sizeof(char)*(strlen(thirdLine)+1));
-    strcpy(thirdLineCopy, thirdLine);
+Hacker ThirdLineFunction(Hacker new_hacker ,char *thirdLine, Student *students){
 
-    printf("third line is %s\n", thirdLine);
-    printf("third line copy is %s\n", thirdLineCopy);
-
-    if (thirdLineCopy == NULL){
+    if (thirdLine == NULL || new_hacker == NULL || students == NULL){
 
         return NULL;
     }
 
-    int numberFriends = 0;
+    char *CopyThirdLine = (char*)malloc(sizeof(char)*(strlen(thirdLine)+1));
+    strcpy(CopyThirdLine, thirdLine);
 
-    token = strtok(thirdLine, " ");
+    if (CopyThirdLine == NULL){
 
-    while (token != NULL && strlen(token) > 0){
-
-        numberFriends++;
-        token = strtok(NULL, " ");
+        return NULL;
     }
 
-    thirdLine = thirdLineCopy;
+    int numberFriends = GetNumberSafe(CopyThirdLine);
+
+    if (numberFriends == -1){
+
+        free(CopyThirdLine);
+        return NULL;
+    }
 
     new_hacker->friends = (Student*)malloc(sizeof(Student)*(numberFriends+1));
 
     if (new_hacker->friends == NULL){
 
+        free(CopyThirdLine);
         return NULL;
     }
 
@@ -141,6 +210,7 @@ Hacker HackerCreate(Student *students,char **fileLine){
 
     if (new_hacker->hacker->friendsID == NULL){
 
+        free(CopyThirdLine);
         return NULL;
     }
 
@@ -150,18 +220,17 @@ Hacker HackerCreate(Student *students,char **fileLine){
     new_hacker->numberFriend = numberFriends;
     new_hacker->hacker->numberFriend = numberFriends;
 
-    token = strtok(thirdLine, " ");
-
-    flag = false;
-
-    i = 0;
+    char *token = strtok(CopyThirdLine, " ");
+    bool flag = false;
+    int i = 0;
 
     while (token != NULL && strlen(token) > 0){
 
         int j = 0;
 
         FixToken(token);
-        bool flag = (strlen(token) == 0);
+
+        flag = (strlen(token) == 0);
 
         while (students[j] != NULL && strlen(token) > 0){
 
@@ -178,6 +247,7 @@ Hacker HackerCreate(Student *students,char **fileLine){
 
         if (!flag){
 
+            free(CopyThirdLine);
             return NULL;
         }
 
@@ -185,41 +255,39 @@ Hacker HackerCreate(Student *students,char **fileLine){
         token = strtok(NULL, " ");
     }
 
-    //free (thirdLineCopy);
+    free(CopyThirdLine);
+    return new_hacker;
+    
+}
 
+Hacker FourthLineFunction(Hacker new_hacker, char *fourthLine, Student* students){
 
-    // now we have the hacker's friends
+    if (fourthLine == NULL || new_hacker == NULL || students == NULL){
 
-    // now let's find the hacker's enemies
-
-    char *fourthLine = fileLine[3];
-    char *fourthLineCopy = (char*)malloc(sizeof(char)*(strlen(fourthLine)+1));
-    strcpy(fourthLineCopy, fourthLine);
-
-    printf("fourth line is %s\n", fourthLine);
-    printf("fourth line copy is %s\n", fourthLineCopy);
-
-    int numberRivals = 0;
-
-    token = strtok(fourthLine, " ");
-    FixToken(token);
-
-    //printf("length of token %s is %d\n", token, strlen(token));
-    //printf("tokennnnnnnnnnnnn: %s\n", token);
-
-    while (token != NULL && strlen(token) > 0){
-
-        numberRivals++;
-        token = strtok(NULL, " ");
+        return NULL;
     }
 
-    fourthLine = fourthLineCopy;
+    char *CopyFourthLine = (char*)malloc(sizeof(char)*(strlen(fourthLine)+1));
+    strcpy(CopyFourthLine, fourthLine);
+
+    if (CopyFourthLine == NULL){
+
+        return NULL;
+    }
+
+    int numberRivals = GetNumberSafe(CopyFourthLine);
+
+    if (numberRivals == -1){
+
+        free(CopyFourthLine);
+        return NULL;
+    }
 
     new_hacker->rivals = (Student*)malloc(sizeof(Student)*(numberRivals+1));
 
     if (new_hacker->rivals == NULL){
 
-        
+        free(CopyFourthLine);
         return NULL;
     }
 
@@ -227,10 +295,9 @@ Hacker HackerCreate(Student *students,char **fileLine){
 
     if (new_hacker->hacker->rivalsID == NULL){
 
+        free(CopyFourthLine);
         return NULL;
     }
-
-    
 
     new_hacker->rivals[numberRivals] = NULL;
     new_hacker->hacker->rivalsID[numberRivals] = NULL;
@@ -238,17 +305,16 @@ Hacker HackerCreate(Student *students,char **fileLine){
     new_hacker->numberRival = numberRivals;
     new_hacker->hacker->numberRival = numberRivals;
 
+    char* token = strtok(CopyFourthLine, " ");
 
-    token = strtok(fourthLine, " ");
-
-    flag = false;
-    i = 0;
+    bool flag = false;
+    int i = 0;
 
     while (token != NULL && strlen(token) > 0){
 
         int j = 0;
         FixToken(token);
-        bool flag = (strlen(token) == 0);
+        flag = (strlen(token) == 0);
 
         while (students[j] != NULL && strlen(token) > 0){
 
@@ -265,6 +331,7 @@ Hacker HackerCreate(Student *students,char **fileLine){
 
         if (!flag){
 
+            free(CopyFourthLine);
             return NULL;
         }
 
@@ -272,20 +339,43 @@ Hacker HackerCreate(Student *students,char **fileLine){
         token = strtok(NULL, " ");
     }
 
-    // now we have the hacker's enemies
-
-    //free(fourthLineCopy);
-
-
-    new_hacker->gotCourseNum = 0;
-
-    // hacker created! 
-
-    printf("hacker created!\n");    
-    
+    free(CopyFourthLine);
     return new_hacker;
-
 }
+
+int GetNumberSafe(char *line){
+
+    if (line == NULL){
+
+        return -1;
+    }
+
+    char *lineCopy = (char*)malloc(sizeof(char)*(strlen(line)+1));
+    strcpy(lineCopy, line);
+
+    if (lineCopy == NULL){
+
+        return -1;
+    }
+    
+    int number = 0;
+
+    char* token = strtok(lineCopy, " ");
+
+    FixToken(token);
+
+    while (token != NULL && strlen(token) > 0){
+
+        number++;
+        token = strtok(NULL, " ");
+    }
+
+    free(lineCopy);
+    free(line);
+    return number;
+}
+
+
 
 void HackerDestroy(Hacker hacker){
 

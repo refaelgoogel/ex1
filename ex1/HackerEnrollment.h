@@ -57,7 +57,7 @@ int friendshipMeasureByNameWithFlag(void *hacker, void* student);
 int ItemsComparisonFunction(void *student1, void *student2);
 CourseQueue* readFileCourses(FILE *coursesFile, int coursesNum, CourseQueue *coursesQueue);
 Student* readFileStudent(FILE *studentFile, int studentNum, Student *students);
-Hacker* readFileHackers(FILE *hackerFile, int HackerNum, Hacker *hackers, Student *students);
+Hacker* readFileHackers(FILE *hackerFile, int hackerNum, Hacker *hackers, Student *students, int studentNum);
 int returnDiffAsciiName(char* hackerName, char* studentName, bool capitalLetter);
 int GetLinesNum(FILE *file);
 int upperToLower(int a);

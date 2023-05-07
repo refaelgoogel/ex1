@@ -14,6 +14,8 @@ int IfEnemyBlocked(IsraeliQueue q, int friendIndex, int itemIndex);
 bool ifAllItemsMerged(IsraeliQueue *qs);
 void MarkAsUnmerged(IsraeliQueue *qs);
 IsraeliQueueError ReallocateMoreSpace(IsraeliQueue q);
+int FriendshipFunctionNumberInQueueArray(IsraeliQueue *qs);
+FriendshipFunction* FriendshipFunctionFiller(IsraeliQueue *qs);
 
 
 
@@ -51,8 +53,8 @@ void PrintIsraeliQueue(IsraeliQueue q){
     }
 
     printf("size_of_friendship_functions is: %d\n", q->size_of_friendship_functions);
-    printf("friendship treshold is %d\n", q->friendship_threshold);
-    printf("rivalty treshold is %d\n", q->rivalry_threshold);
+    printf("friendship threshold is %d\n", q->friendship_threshold);
+    printf("rivalry threshold is %d\n", q->rivalry_threshold);
 
     
     printf("\n--------End of IsraeliQUeue Print---------\n");
@@ -108,9 +110,7 @@ IsraeliQueue IsraeliQueueCreate(FriendshipFunction *friendshipFunctions, Compari
     new_queue->expend_base = 2;
     new_queue->size = 0;
 
-    printf("finished creating new queue!\n");
     return new_queue;
-
 }
 
 /**Returns a new queue with the same elements as the parameter. If the parameter is NULL,
@@ -158,7 +158,6 @@ IsraeliQueue IsraeliQueueClone(IsraeliQueue q){
     }
 
     return cloned_queue;    
-
 }
 
 /**@param IsraeliQueue: an IsraeliQueue created by IsraeliQueueCreate
@@ -167,19 +166,19 @@ IsraeliQueue IsraeliQueueClone(IsraeliQueue q){
  * the parameter.*/
 void IsraeliQueueDestroy(IsraeliQueue q){
 
-        if (q == NULL){
+    if (q == NULL){
 
-            return;
-        }
+        return;
+    }
 
-        free(q->friendship_functions);
+    free(q->friendship_functions);
 
-        for (int i = 0; i<q->size; i++){
+    for (int i = 0; i<q->size; i++){
 
-            ItemDestroy(q->array[i]);
-        }
+        ItemDestroy(q->array[i]);
+    }
 
-        free(q);
+    free(q);
 }
 
 
@@ -234,7 +233,7 @@ int IfRival(IsraeliQueue q, Item item1, Item item2){
 IsraeliQueueError IsraeliQueueEnqueue(IsraeliQueue q, void *item){
 
     if (q == NULL){
-	
+
         return ISRAELIQUEUE_BAD_PARAM;
     }
 
@@ -242,30 +241,21 @@ IsraeliQueueError IsraeliQueueEnqueue(IsraeliQueue q, void *item){
 
     if (error != ISRAELIQUEUE_SUCCESS){
 
-        
         return ISRAELIQUEUE_ALLOC_FAILED;
     }
     
     Item new_item = ItemCreate(item);
-	
 
-    if (new_item == NULL){
-
-        return ISRAELIQUEUE_ALLOC_FAILED;
-    }
+    if (new_item == NULL){return ISRAELIQUEUE_ALLOC_FAILED;}
 
     // let's divided into 2 cases: 
 
     // case 1: there is no friendship functions
 
-    printf("Line 261\n");
-
     if (q->size_of_friendship_functions == 0){ // enqueue like regular queue without trying to improve position
 
-        printf("-----------no friendship functions ------ ");
         q->array[q->size] = new_item;
         q->size++;
-        printf("Line 268\n");
         return ISRAELIQUEUE_SUCCESS;
     }
 	
@@ -306,8 +296,6 @@ IsraeliQueueError IsraeliQueueEnqueue(IsraeliQueue q, void *item){
                 q->array[EnemyBlock]->blockedRivals++;
                 continue; // continue searching for other friend
             }
-
-
         }
 
     }
@@ -483,36 +471,29 @@ int IfExsistFurtherFriend(IsraeliQueue q, int itemIndex, int StartingPosition){
 
 }
 
-
-
 /**Advances each item in the queue to the foremost position accessible to it,
  * from the back of the queue frontwards.*/
 IsraeliQueueError IsraeliQueueImprovePositions(IsraeliQueue q){
 
-	
     if (q == NULL){
 
         return ISRAELIQUEUE_BAD_PARAM;
-    }else if (q->size == 0 || q->size == 1){
-
-        return ISRAELIQUEUE_SUCCESS;
-    }
-
+    } 
+    
+    else if (q->size == 0 || q->size == 1){ return ISRAELIQUEUE_SUCCESS;}
 
     for (int j = 0; j < q->size; j++){
 
-        
         int ImproveCurrentItemIndex = (q->size - 1); 
 
         while (q->array[ImproveCurrentItemIndex]->improvedPosition == true){
-			
+
             ImproveCurrentItemIndex--;
         }
 		            
         // ImproveCurrentItemIndex is the index of item that hasn't improved position yet
 
         // imroving position of item ImproveCurrentItemIndex
-
 
         if (ImproveCurrentItemIndex == 0){
 
@@ -521,13 +502,10 @@ IsraeliQueueError IsraeliQueueImprovePositions(IsraeliQueue q){
 
         }else{
 
-            
             int index_of_improvment = ImproveCurrentItemIndex;
-
 
             // searching for friends
             for (int k = 0; k < ImproveCurrentItemIndex; k++){ 
-                
 
                 // searching for friends with passing ability from k to ImproveCurrentItemIndex
                 int friendIndex = IfExsistFurtherFriend(q, ImproveCurrentItemIndex, k);
@@ -537,7 +515,6 @@ IsraeliQueueError IsraeliQueueImprovePositions(IsraeliQueue q){
                     break;
 
                 }else{//has friend in index friendIndex
-
 
                     // checking if there is a rival between the friend and the item
                     int rivalIndex = IfEnemyBlocked(q, friendIndex, ImproveCurrentItemIndex);
@@ -554,17 +531,12 @@ IsraeliQueueError IsraeliQueueImprovePositions(IsraeliQueue q){
                         continue; 
 
                     }
-
-
                 }
-
-                
             }
 
             if (index_of_improvment >= (ImproveCurrentItemIndex-1)){ // no friend has been found or friend is too close to item
 
                 q->array[ImproveCurrentItemIndex]->improvedPosition = true;
-                
 
             }else{
 
@@ -574,7 +546,6 @@ IsraeliQueueError IsraeliQueueImprovePositions(IsraeliQueue q){
 
                     q->array[c] = q->array[c-1];
                 }
-                
 
                 q->array[index_of_improvment+1] = temp;
                 q->array[ImproveCurrentItemIndex]->improvedPosition = true;
@@ -582,11 +553,8 @@ IsraeliQueueError IsraeliQueueImprovePositions(IsraeliQueue q){
                 continue; // continue improving position of another items
 
             }
-
         }
-    
     }
-
 
     for (int i = 0; i < q->size; i++){
 
@@ -596,7 +564,6 @@ IsraeliQueueError IsraeliQueueImprovePositions(IsraeliQueue q){
     return ISRAELIQUEUE_SUCCESS;
 
 }
-
 
 
 /**@param q_arr: a NULL-terminated array of IsraeliQueues
@@ -610,57 +577,23 @@ IsraeliQueue IsraeliQueueMerge(IsraeliQueue *qs ,ComparisonFunction f){
     //(FriendshipFunction *friendshipFunctions, ComparisonFunction comparisonFunction, int friendship_th, int rivalry_th){
     
     if (qs == NULL || f == NULL){
-
+        
         return NULL;
     }
 
-
-    int sum_of_functions = 0;
-    int i = 0;
-
-    while (qs[i] != NULL){
-
-        
-        int j = 0;
-
-        while (qs[i]->friendship_functions[j] != NULL){
-
-            sum_of_functions++;
-            j++;
-        }
-
-    }
-
-    FriendshipFunction *friendshipFunctions = (FriendshipFunction*)malloc(sizeof(FriendshipFunction) * (sum_of_functions+1));
+    FriendshipFunction *friendshipFunctions = FriendshipFunctionFiller(qs);
 
     if (friendshipFunctions == NULL){
 
         return NULL;
     }
 
-    i = 0;
-    int k = 0;
-
-    while (qs[i] != NULL){
-
-        int j = 0;
-
-        while (qs[i]->friendship_functions[j] != NULL){
-
-            friendshipFunctions[k] = qs[i]->friendship_functions[j];
-            k++;
-            j++;
-        }
-
-    }
-
-
     // computing friendship treshold and rivalry treshold
 
     int new_friendship_th = 0;
     int new_rivalry_th = 1;
 
-    i = 0;
+    int i = 0;
 
     while (qs[i] != NULL){
 
@@ -674,7 +607,6 @@ IsraeliQueue IsraeliQueueMerge(IsraeliQueue *qs ,ComparisonFunction f){
     new_friendship_th = (int)((new_friendship_th + i - 1) / i); // ceiling to the nearest integer
     new_rivalry_th = (int)ceil(pow(new_rivalry_th, rootOrder)); // ceiling to the nearest integer
 
-
     // creating new queue
 
     IsraeliQueue new_queue = IsraeliQueueCreate(friendshipFunctions,f,new_friendship_th,new_rivalry_th);
@@ -686,9 +618,7 @@ IsraeliQueue IsraeliQueueMerge(IsraeliQueue *qs ,ComparisonFunction f){
         return NULL;
     }     
 
-
     // transfering items from qs to new_queue
-
 
     while (!ifAllItemsMerged(qs)){ // while there is at least one item in one of the queues that has not been merged
 
@@ -740,6 +670,60 @@ IsraeliQueue IsraeliQueueMerge(IsraeliQueue *qs ,ComparisonFunction f){
 
 }
 
+
+int FriendshipFunctionNumberInQueueArray(IsraeliQueue *qs){
+
+    int i = 0;
+    int sum_of_functions = 0;
+
+    while (qs[i] != NULL){
+
+        int j = 0;
+
+        while (qs[i]->friendship_functions[j] != NULL){
+
+            sum_of_functions++;
+            j++;
+        }
+    }
+
+    return sum_of_functions;
+}
+
+FriendshipFunction* FriendshipFunctionFiller(IsraeliQueue *qs){
+
+    int sum_of_functions = FriendshipFunctionNumberInQueueArray(qs);
+
+    FriendshipFunction *friendshipFunctions = (FriendshipFunction*)malloc(sizeof(FriendshipFunction) * (sum_of_functions+1));
+
+    if (friendshipFunctions == NULL){ 
+        
+        return NULL;
+    }
+
+    int i = 0;
+    int k = 0;
+
+    while (qs[i] != NULL){
+
+        int j = 0;
+
+        while (qs[i]->friendship_functions[j] != NULL){
+
+            friendshipFunctions[k] = qs[i]->friendship_functions[j];
+            k++;
+            j++;
+        }
+
+    }
+
+    friendshipFunctions[k] = NULL;
+
+    return friendshipFunctions;
+}
+
+
+
 bool ifAllItemsMerged(IsraeliQueue *qs){
 
     int i = 0;
@@ -763,6 +747,7 @@ bool ifAllItemsMerged(IsraeliQueue *qs){
 
     return true;
 }
+
 
 void MarkAsUnmerged(IsraeliQueue *qs){
 
