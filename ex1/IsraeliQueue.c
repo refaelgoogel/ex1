@@ -16,6 +16,7 @@ void MarkAsUnmerged(IsraeliQueue *qs);
 IsraeliQueueError ReallocateMoreSpace(IsraeliQueue q);
 
 
+
 struct IsraeliQueue_t{
 
     FriendshipFunction *friendship_functions;
@@ -667,8 +668,10 @@ IsraeliQueue IsraeliQueueMerge(IsraeliQueue *qs ,ComparisonFunction f){
         i++;
     }
 
+    double rootOrder = (1.0 / ((double)i));
+
     new_friendship_th = (int)((new_friendship_th + i - 1) / i); // ceiling to the nearest integer
-    new_rivalry_th = (int)ceil(pow(new_rivalry_th, i)); // ceiling to the nearest integer
+    new_rivalry_th = (int)ceil(pow(new_rivalry_th, rootOrder)); // ceiling to the nearest integer
 
 
     // creating new queue
@@ -797,4 +800,3 @@ IsraeliQueueError ReallocateMoreSpace(IsraeliQueue q){
 
     return ISRAELIQUEUE_SUCCESS;
 }
-
