@@ -1,4 +1,5 @@
 #include "CourseQueue.h"
+#include "Hacker.h"
 
 
 CourseQueue CourseQueueCreate(char *fileLine){
@@ -40,12 +41,14 @@ CourseQueue CourseQueueCreate(char *fileLine){
 }
 
 
-CourseQueue InsertStudentsToCourseQueue(CourseQueue courseQueue, char *fileLine, Student *students){
+CourseQueue InsertStudentsToCourseQueue(CourseQueue courseQueue, char *fileLine, Student *students, int studentNum){
 
 	if (courseQueue == NULL || fileLine == NULL || strlen(fileLine) == 0 || students == NULL) {
 		
 		return NULL;
 	}
+
+	printf("file line is %s\n", fileLine);
 
 	char *token = strtok(fileLine, " ");
 		
@@ -61,9 +64,10 @@ CourseQueue InsertStudentsToCourseQueue(CourseQueue courseQueue, char *fileLine,
 
 	while (token != NULL && strlen(token) > 0){ // running on all over the studentId
 		
-		int i = 0;
+		for (int i = 0; i < studentNum; i++){ // running on all over the students
 
-		while (students[i]->studentID != NULL){ // running on all over the students
+			FixToken(students[i]->studentID);
+			FixToken(token);
 
 			if (strcmp(students[i]->studentID, token) == 0){ // we found the student
 
@@ -73,7 +77,6 @@ CourseQueue InsertStudentsToCourseQueue(CourseQueue courseQueue, char *fileLine,
 				break;
 			}
 
-			i++;
 		}
 
 		// TODO - what if we didn't find the student?
@@ -99,3 +102,16 @@ void  CourseQueueDestroy(CourseQueue curseQueue){
 }
 
 
+void PrintCourse(CourseQueue curseQueue){
+
+	printf("--------Course print---------\n");
+
+	printf("courseID: %s\n",curseQueue->courseID);
+	printf("course size: %d\n",curseQueue->courseSize);
+	printf("currentSize: %d\n",curseQueue->currentSize);
+	PrintIsraeliQueue(curseQueue->studentQueue);
+	
+
+	printf("-------- End of course---------\n");
+	
+}

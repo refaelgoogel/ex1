@@ -25,5 +25,8 @@ typedef struct Hacker {
 
 Hacker HackerCreate(Student *students,char **fileLine);
 void HackerDestroy(Hacker curseQueue);
+void FixToken(char *token);
+void PrintHacker(Hacker hacker);
+
 
 #endif

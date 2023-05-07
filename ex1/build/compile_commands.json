@@ -1,0 +1,8 @@
+[
+{
+  "directory": "C:/Users/refae/Desktop/mtm/ex1/build",
+  "command": "C:\\MinGW\\bin\\gcc.exe   -g -std=gnu99 -o CMakeFiles\\ex1.dir\\main.c.obj -c C:\\Users\\refae\\Desktop\\mtm\\ex1\\main.c",
+  "file": "C:/Users/refae/Desktop/mtm/ex1/main.c",
+  "output": "CMakeFiles/ex1.dir/main.c.obj"
+}
+]

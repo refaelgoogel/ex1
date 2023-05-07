@@ -17,10 +17,16 @@ typedef struct Student {
     char* surname;
     char* city;
     char* department;
+    bool ifHacker;
+    char** friendsID;
+    int numberFriend;
+    char** rivalsID;
+    int numberRival;
 
 } *Student;
 
 Student studentCreate(char *fileLine);
+void PrintStudent(Student student);
 void studentDestroy(Student student);
 
 #endif

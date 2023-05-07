@@ -1,6 +1,7 @@
 #include "Item.h"
 #include <math.h>
 #include "IsraeliQueue.h"
+#include "Student.h"
 
 
 #define FRIENDS_PASS_LIMIT 5
@@ -13,7 +14,6 @@ int IfEnemyBlocked(IsraeliQueue q, int friendIndex, int itemIndex);
 bool ifAllItemsMerged(IsraeliQueue *qs);
 void MarkAsUnmerged(IsraeliQueue *qs);
 IsraeliQueueError ReallocateMoreSpace(IsraeliQueue q);
-IsraeliQueueError IsraeliQueueEnqueueInOrder(IsraeliQueue q, void *item);
 
 
 struct IsraeliQueue_t{
@@ -33,6 +33,32 @@ struct IsraeliQueue_t{
 /**Creates a new IsraeliQueue_t object with the provided friendship functions, a NULL-terminated array,
  * comparison function, friendship threshold and rivalry threshold. Returns a pointer
  * to the new object. In case of failure, return NULL.*/
+
+void PrintIsraeliQueue(IsraeliQueue q){
+
+    printf("\n--------IsraeliQueue print---------\n");
+
+
+    printf("number of students inside IsraeliQueue is %d \n",q->size);
+
+    printf("these are the students inside IsraeliQueue: \n");
+
+    for (int i = 0; i < q->size; i++){
+        
+        Student student = (Student)(q->array[i]->data);
+        PrintStudent(student);
+    }
+
+    printf("size_of_friendship_functions is: %d\n", q->size_of_friendship_functions);
+    printf("friendship treshold is %d\n", q->friendship_threshold);
+    printf("rivalty treshold is %d\n", q->rivalry_threshold);
+
+    
+    printf("\n--------End of IsraeliQUeue Print---------\n");
+
+}
+
+
 IsraeliQueue IsraeliQueueCreate(FriendshipFunction *friendshipFunctions, ComparisonFunction comparisonFunction, int friendship_th, int rivalry_th){
 
     IsraeliQueue new_queue = (IsraeliQueue)malloc(sizeof(*new_queue));
@@ -42,15 +68,19 @@ IsraeliQueue IsraeliQueueCreate(FriendshipFunction *friendshipFunctions, Compari
         return NULL;
     }
 
+
     int i = 0;
 
-    while (friendshipFunctions[i] != NULL){
 
-        i++;
+    if (friendshipFunctions != NULL){
+
+        while (friendshipFunctions[i] != NULL){
+
+            i++;
+        }
+
     }
-    
-	printf("sarting!!!!! size of Friendship Function is %d\n",i);
-	
+    	
     new_queue->friendship_functions = (FriendshipFunction*)malloc(sizeof(FriendshipFunction) * (i+1));
 
     if (new_queue->friendship_functions == NULL){
@@ -77,6 +107,7 @@ IsraeliQueue IsraeliQueueCreate(FriendshipFunction *friendshipFunctions, Compari
     new_queue->expend_base = 2;
     new_queue->size = 0;
 
+    printf("finished creating new queue!\n");
     return new_queue;
 
 }
@@ -102,7 +133,7 @@ IsraeliQueue IsraeliQueueClone(IsraeliQueue q){
 
     for (int i = 0; i < q->size; i++){
 
-        ReallocateMoreSpace(q); // reallocating more space *if needed*
+        ReallocateMoreSpace(cloned_queue); // reallocating more space *if needed*
 
         Item item = ItemCreate(q->array[i]->data); // creating a new item with the same data as the old item
 
@@ -125,7 +156,7 @@ IsraeliQueue IsraeliQueueClone(IsraeliQueue q){
 
     }
 
-    return cloned_queue;
+    return cloned_queue;    
 
 }
 
@@ -161,10 +192,6 @@ int IfRival(IsraeliQueue q, Item item1, Item item2){
 	}
 	
 	if (q->size_of_friendship_functions == 0) {return 0;}
-	
-	printf("checking rivality...\n");
-	
-	printf("size of friendship is: %d\n",q->size_of_friendship_functions);
 
     int rivalitySum = 0;
 
@@ -172,6 +199,7 @@ int IfRival(IsraeliQueue q, Item item1, Item item2){
  
         if ((q->friendship_functions[i](item1->data, item2->data)) > (q->friendship_threshold)){
 			
+            printf("friends!\n");
             return 1; // 1 for friend
 			
         }else{
@@ -188,6 +216,7 @@ int IfRival(IsraeliQueue q, Item item1, Item item2){
 
     if (rivalitySum < q->rivalry_threshold){
 
+        printf("enemies!\n");
         return -1; // negative mean enemy
     }
 
@@ -208,11 +237,11 @@ IsraeliQueueError IsraeliQueueEnqueue(IsraeliQueue q, void *item){
         return ISRAELIQUEUE_BAD_PARAM;
     }
 
-
     IsraeliQueueError error = ReallocateMoreSpace(q);
 
     if (error != ISRAELIQUEUE_SUCCESS){
 
+        
         return ISRAELIQUEUE_ALLOC_FAILED;
     }
     
@@ -221,7 +250,6 @@ IsraeliQueueError IsraeliQueueEnqueue(IsraeliQueue q, void *item){
 
     if (new_item == NULL){
 
-		printf("error");
         return ISRAELIQUEUE_ALLOC_FAILED;
     }
 
@@ -229,8 +257,11 @@ IsraeliQueueError IsraeliQueueEnqueue(IsraeliQueue q, void *item){
 
     // case 1: there is no friendship functions
 
+    
+
     if (q->size_of_friendship_functions == 0){ // enqueue like regular queue without trying to improve position
 
+        printf("-----------no friendship functions ------ ");
         q->array[q->size] = new_item;
         q->size++;
         return ISRAELIQUEUE_SUCCESS;
@@ -238,12 +269,9 @@ IsraeliQueueError IsraeliQueueEnqueue(IsraeliQueue q, void *item){
 	
     // if we got here, there are friendship functions (because there is return in the previous if statement)
     // case 2: there are friendship functions
-
-	printf("the size of q is: %d\n", q->size);
 	
     if (q->size == 0){
 		
-		printf("the size of q is: %d\n", q->size);
         q->array[0] = new_item;
         q->size++;
         return ISRAELIQUEUE_SUCCESS;
@@ -252,43 +280,27 @@ IsraeliQueueError IsraeliQueueEnqueue(IsraeliQueue q, void *item){
 
 	q->array[q->size] = new_item;
 	
-	
     int swapIndex = q->size;
 	
-	printf("out of the loop: current SwapIndex is %d\n", swapIndex);
-
     for (int j = 0; j< q->size; j++){
 
         int FurtherFriend = IfExsistFurtherFriend(q, q->size, j);
-		
-		printf("Index of FurtherFriend is %d\n", FurtherFriend);
-
 
         if (FurtherFriend == -1){ // no friends have been found
 
-			printf("no friend has been found!\n");
             break;
 
         }else{ // friend found
 		
-		
-			printf("friend has been found!\n");
-
             int EnemyBlock = IfEnemyBlocked(q, FurtherFriend, q->size);
-			
-			printf("Index of EnemyBlock is %d\n", EnemyBlock);
-
 
             if (EnemyBlock == -1){ // no enemies have been found
 
-				printf("no Blocking enemies has been found!\n");
                 swapIndex = FurtherFriend;
-				printf("current SwapIndex is %d\n", swapIndex);
                 break;
 
             }else{// enemy found
 
-				printf("Blocking enemies has been found!\n");
                 q->array[EnemyBlock]->blockedRivals++;
                 continue; // continue searching for other friend
             }
@@ -298,42 +310,21 @@ IsraeliQueueError IsraeliQueueEnqueue(IsraeliQueue q, void *item){
 
     }
 
-	printf("out of the loop!\n");
-	printf("current SwapIndex is %d\n", swapIndex);
-
     if (swapIndex == q->size || swapIndex == (q->size-1)){ // if we get in, the item is not friend of anyone or friend of the last item
 
-		printf(" the exp swapIndex == q->size || swapIndex == (q->size-1) is true. friends is not everything!\n");
         q->array[q->size] = new_item;
         q->size++;
         return ISRAELIQUEUE_SUCCESS;
 
     } else { // if we get in, the item is friend of someone 
-
-	
-		printf("item is friend of someone and there is no block!\n");
-		printf("current SwapIndex is %d\n", swapIndex);
-
-		printf("shifting all item...\n");
-		printf("...\n");
-		printf("...\n");
-		printf("...\n");
 		
         for (int i = q->size ; i > (swapIndex+1) ; i--){ // shift all items to the right
 
             q->array[i] = q->array[i-1];
         } 
 		
-		printf("done!\n");
-		
-		printf("current (SwapIndex+1) is %d\n", (swapIndex+1));
-
-		
         q->array[swapIndex+1] = new_item;
         q->size++;
-		
-		printf("finished!\n");
-
 
         return ISRAELIQUEUE_SUCCESS;
         
@@ -477,8 +468,6 @@ int IfExsistFurtherFriend(IsraeliQueue q, int itemIndex, int StartingPosition){
 
         return -1;
     }
-
-	
 	
     for (int i = StartingPosition; i < itemIndex; i++){
 
@@ -517,9 +506,7 @@ IsraeliQueueError IsraeliQueueImprovePositions(IsraeliQueue q){
 			
             ImproveCurrentItemIndex--;
         }
-		
-		printf("current improving item index = %d\n",ImproveCurrentItemIndex);
-            
+		            
         // ImproveCurrentItemIndex is the index of item that hasn't improved position yet
 
         // imroving position of item ImproveCurrentItemIndex

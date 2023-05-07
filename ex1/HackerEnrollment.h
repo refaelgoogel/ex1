@@ -16,6 +16,8 @@ typedef struct EnrollmentSystem
 	CourseQueue *coursesQueue;
     Student *students;
     Hacker *hackers;
+    int numberHackers;
+    int numberStudents;
     int numberCourses;
     bool nameFlag;
     
@@ -43,10 +45,10 @@ enrollmentSystemError AddingNewStudent(int id, int credits, double gpa, char* na
 bool ifStudentExist(int id); 
 bool ifCourseExist(int courseNumber);
 bool ifHackerGetCourse(CourseQueue courseQueue ,Hacker h);
-int returnIndexOfCourseByID(CourseQueue *courseQueue, char *courseID);
+int returnIndexOfCourseByID(CourseQueue *courseQueue, char *courseID, int coursesNum);
 int comparisonRequireToAccept(int requireCourses, int accepteCourses);
-bool getHackerInToTheRequiredCourses(CourseQueue *courseQueue, Hacker hacker);
- void SetNameFlag(enrollmentSystem sys, bool flag);
+bool getHackerInToTheRequiredCourses(CourseQueue *courseQueue, Student hacker,char** wantedCourseID, int wantedCoursesNum, int coursesNum);
+void SetNameFlag(enrollmentSystem sys, bool flag);
 
 int friendshipMeasureByFile(void *hacker, void* student);
 int friendshipMeasureByID(void *hacker, void* student);

@@ -1,5 +1,6 @@
 #define _GNU_SOURCE
 #include "HackerEnrollment.h"
+#include "Item.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -24,13 +25,40 @@ int GetLinesNum(FILE *file);
 int min(int a, int b);
 Student ReturnStudentFromQueueByIndex(CourseQueue courseQueue, int index);
 
+void PrintSystem(enrollmentSystem sys){
+
+    printf("--------SYSTEM PRINT---------\n");
+
+
+    printf("number of courses: %d\n",sys->numberCourses);
+
+    for (int i = 0; i<sys->numberCourses; i++){
+
+        PrintCourse(sys->coursesQueue[i]);
+    }
+
+    for (int i = 0; i<sys->numberStudents; i++){
+
+        PrintStudent(sys->students[i]);
+    }
+
+    for (int i = 0; i< sys->numberHackers; i++){
+
+        PrintHacker(sys->hackers[i]);
+    }
+
+    printf("--------END OF SYSTEM PRINT---------\n");
+
+   
+}
+
+
 enrollmentSystem createEnrollmentSystem(FILE* students, FILE* courses, FILE* hackers){
 
     enrollmentSystem new_system = (enrollmentSystem)malloc(sizeof(*new_system));
 
     if (new_system == NULL){
 
-        printf("ERROR: inside createEnrollmentSystem line 32\n");
         return NULL;
     }
 
@@ -41,28 +69,20 @@ enrollmentSystem createEnrollmentSystem(FILE* students, FILE* courses, FILE* hac
     new_system->hackers_file = hackers;
    
     int numberCourses = GetLinesNum(new_system->courses_file);
+
+    new_system->numberCourses = numberCourses;
+
     int numberStudents = GetLinesNum(new_system->students_file);
 
     int numberHackers = GetLinesNum(new_system->hackers_file);
 
-    printf("numberCourses = %d\n", numberCourses);
-    printf("numberStudents = %d\n", numberStudents);
-    printf("numberHackers = %d\n", numberHackers);
-
-    numberCourses = GetLinesNum(new_system->courses_file);
-    numberStudents = GetLinesNum(new_system->students_file);
-
-    numberHackers = GetLinesNum(new_system->hackers_file);
-
     numberHackers = numberHackers/4; // because each hacker has 4 lines
+    new_system->numberHackers = numberHackers;
     
-    printf("numberHackers = %d\n", numberHackers);
-
     new_system->coursesQueue = (CourseQueue*)malloc(sizeof(CourseQueue)*(numberCourses+1));
 
     if (new_system->coursesQueue == NULL){
 
-        printf("ERROR: inside createEnrollmentSystem line 52\n");
         return NULL;
     }
 
@@ -74,7 +94,6 @@ enrollmentSystem createEnrollmentSystem(FILE* students, FILE* courses, FILE* hac
 
     if (new_system->coursesQueue == NULL){
 
-        printf("ERROR: inside createEnrollmentSystem line 64\n");
         return NULL;
     }
 
@@ -93,28 +112,26 @@ enrollmentSystem createEnrollmentSystem(FILE* students, FILE* courses, FILE* hac
 
         if (new_system->coursesQueue[i]->studentQueue == NULL){
 
-            printf("ERROR: inside createEnrollmentSystem line 82, round %d\n",i);
             return NULL;
         }
 
     }
 
-    printf("got here! 102!\n");
-
     // finished creating CourseQueue
 
-    
     // creating the students array inside the enrollmentSystem
 
     new_system->students = (Student*)malloc(sizeof(Student)*(numberStudents+1));
 
     if (new_system->students == NULL){
 
-        printf("ERROR: inside createEnrollmentSystem line 98\n");
         return NULL;
     }
 
     new_system->students[numberStudents] = NULL;
+
+    new_system->numberStudents = numberStudents;
+
     new_system->students = readFileStudent(new_system->students_file, numberStudents, new_system->students);
 
     if (new_system->students == NULL){
@@ -122,11 +139,11 @@ enrollmentSystem createEnrollmentSystem(FILE* students, FILE* courses, FILE* hac
         return NULL;
     }
 
+    
     new_system->hackers = (Hacker*)malloc(sizeof(Hacker)*(numberHackers+1));
 
     if (new_system->hackers == NULL){
 
-        printf("ERROR: inside createEnrollmentSystem line 114\n");
         return NULL;
     }
 
@@ -138,21 +155,24 @@ enrollmentSystem createEnrollmentSystem(FILE* students, FILE* courses, FILE* hac
 
     if (new_system->hackers == NULL){
 
-        printf("ERROR: inside createEnrollmentSystem line 126\n");
+        printf("hackers NULL!");
         return NULL;
     }
 
     new_system->nameFlag = false;
 
+
+    PrintSystem(new_system);
     return new_system;
      
  }
+
+
 
  CourseQueue* readFileCourses(FILE* coursesFile, int coursesNum, CourseQueue *coursesQueue){
 
   if (coursesFile == NULL || coursesQueue == NULL) 
   {
-    printf("ERROR: inside readFilesCourses line 140\n");
     return NULL;
   }
 
@@ -162,7 +182,6 @@ enrollmentSystem createEnrollmentSystem(FILE* students, FILE* courses, FILE* hac
 
   if (coursesFile == NULL){
 
-    printf("ERROR: inside readFilesCourses line 151\n");
     return NULL;
 }
 
@@ -178,14 +197,15 @@ for (int i = 0; i < coursesNum; i++){
     
     }else {
 
-        printf("ERROR: inside readFilesCourses line 165 round %d\n",i);
         return NULL;
     }
     
 }
 
-    fseek(coursesFile, 0, SEEK_SET);
-    return coursesQueue;
+
+
+fseek(coursesFile, 0, SEEK_SET);
+return coursesQueue;
 
 }
 
@@ -208,14 +228,14 @@ Student* readFileStudent(FILE *studentFile, int studentNum, Student *students){
         return NULL;
     }
 
-char *fileLine = NULL;
-size_t len = 0;
+    char *fileLine = NULL;
+    size_t len = 0;
   
-if (studentFile == NULL){
+    if (studentFile == NULL){
+
+        return NULL;
     
-    return NULL;
-    
-}
+    }
 
 
     fseek(studentFile, 0, SEEK_SET);
@@ -226,12 +246,15 @@ if (studentFile == NULL){
         if ((getline(&fileLine, &len, studentFile)) != -1){
 
             students[i] = studentCreate(fileLine);
+            //printf("create Student function returns:\n");
+            //PrintStudent(students[i]);
             fileLine = NULL;
             len = 0;
 
         }else{
 
-        return NULL;
+            return NULL;
+
         } 
 
     }
@@ -272,7 +295,9 @@ Hacker* readFileHackers(FILE *hackerFile, int hackerNum, Hacker *hackers, Studen
 
         } 
 
+        //printf("create hacker function returns:\n");
         hackers[i] = HackerCreate(students,hackerLines);
+        //PrintHacker(hackers[i]);
 
         if (hackers[i] == NULL){
 
@@ -280,6 +305,7 @@ Hacker* readFileHackers(FILE *hackerFile, int hackerNum, Hacker *hackers, Studen
         }
 
     }
+
 
     fseek(hackerFile, 0, SEEK_SET);
     return hackers;
@@ -322,10 +348,15 @@ Hacker* readFileHackers(FILE *hackerFile, int hackerNum, Hacker *hackers, Studen
 //<Course Number> <Student IDs>* and will return an EnrollmentSystem structure representing the registration queues
 enrollmentSystem readEnrollment(enrollmentSystem sys, FILE* queues){
 
+    
     if (sys == NULL || queues == NULL){
 
         return NULL;
     }
+
+    //printf("******************** system before adding students to courses ********************\n");
+    //PrintSystem(sys);
+    //printf("*********************************************************************************\n");
 
     char *fileLine = NULL;
     size_t len = 0;
@@ -355,27 +386,33 @@ enrollmentSystem readEnrollment(enrollmentSystem sys, FILE* queues){
 
     fseek(queues, 0, SEEK_SET);
 
+
     // now we will read the file and insert the students to the courses
     while ((getline(&fileLine, &len, queues)) != -1){
 
 
+        char *temp = (char*)malloc((strlen(fileLine) + 1) * sizeof(char));
+        strcpy(temp, fileLine);
+
         if (strlen(fileLine) == 0){
 
-          break;
+            break;
         }
 
-        char *courseNum = strtok(fileLine, " ");
+        char *courseID = strtok(fileLine, " ");
+        FixToken(courseID);
+
 
         //int i = 0;
         
-        int indexOfCourse = returnIndexOfCourseByID(sys->coursesQueue, courseNum);
+        int indexOfCourse = returnIndexOfCourseByID(sys->coursesQueue, courseID, sys->numberCourses);
 
         if (indexOfCourse == -1){
 
             return NULL;
         }
         
-        if (InsertStudentsToCourseQueue(sys->coursesQueue[indexOfCourse], fileLine, sys->students) == NULL){
+        if (InsertStudentsToCourseQueue(sys->coursesQueue[indexOfCourse], temp, sys->students, sys->numberStudents) == NULL){
 
             return NULL;
         }
@@ -383,15 +420,27 @@ enrollmentSystem readEnrollment(enrollmentSystem sys, FILE* queues){
         IsraeliQueueAddFriendshipMeasure(sys->coursesQueue[indexOfCourse]->studentQueue, FunctionArr[0]);
         IsraeliQueueAddFriendshipMeasure(sys->coursesQueue[indexOfCourse]->studentQueue, FunctionArr[1]);
         IsraeliQueueAddFriendshipMeasure(sys->coursesQueue[indexOfCourse]->studentQueue, FunctionArr[2]);
+
+
+        free(temp);
         
     } // finished reading the file and inserting the students to the courses
 
 
     fseek(queues, 0, SEEK_SET);
+
+    printf("\n******************** system after adding students to courses ********************\n");
+    PrintSystem(sys);
+    printf("\n*********************************************************************************\n");
+
     return sys;
 }
 
 void hackEnrollment(enrollmentSystem sys, FILE* out){
+
+    printf("\n******************** system before hackenrollment courses ********************\n");
+    PrintSystem(sys);
+    printf("\n*********************************************************************************\n");
 
     if (sys == NULL || out == NULL){
 
@@ -400,15 +449,18 @@ void hackEnrollment(enrollmentSystem sys, FILE* out){
 
     int i = 0;
 
-    while (sys->hackers[i]){
+    for (; i < sys->numberHackers; i++){
 
-        if (getHackerInToTheRequiredCourses(sys->coursesQueue , sys->hackers[i]) == false){
+        if (getHackerInToTheRequiredCourses(sys->coursesQueue,sys->hackers[i]->hacker ,sys->hackers[i]->wantedCoursesID,sys->hackers[i]->wantedCoursesNum, sys->numberCourses) == false){
 
             return; // flag of error, need to print error message to the file and return everything to it's original state
         }
        
-        i++;
     }
+
+    //printf("\n******************** system after getting hacker to wanted courses ********************\n");
+    //PrintSystem(sys);
+    //printf("\n*********************************************************************************\n");
 
     // we have enqueue every hacker to the courses he wanted to
 
@@ -419,76 +471,99 @@ void hackEnrollment(enrollmentSystem sys, FILE* out){
    i = 0;
    int j = 0;
 
-    while (sys->hackers[i]){
+
+    for (; i < sys->numberHackers; i++){
     
+        printf("PPPPPPPPPPPPPPPPPPPPhacker %s has %d wanted courses\n",sys->hackers[i]->hacker->studentID, sys->hackers[i]->wantedCoursesNum);
+
         for (; j < sys->hackers[i]->wantedCoursesNum; j++){
-       
-            index = returnIndexOfCourseByID(sys->coursesQueue, sys->hackers[i]->wantedCoursesID[j]);
 
-                if (ifHackerGetCourse(sys->coursesQueue[index] ,sys->hackers[i]) == true){
+            printf("wanted course id = %s\n",sys->hackers[i]->wantedCoursesID[j]);       
+            index = returnIndexOfCourseByID(sys->coursesQueue, sys->hackers[i]->wantedCoursesID[j], sys->numberCourses);
+            printf("index of wanted course = %d\n",index);
 
-                    sys->hackers[i]->gotCourseNum++;
-                }
+            if (ifHackerGetCourse(sys->coursesQueue[index] ,sys->hackers[i]) == true){
 
-        }  
+                sys->hackers[i]->gotCourseNum++;
+                printf("hacker got course!\n");
+            }
 
+
+        }
+
+        j = 0;  
+
+
+    }
+    
+    printf("\n******************** system after checking if hacker get course ********************\n");
+    PrintSystem(sys);
+    printf("\n*********************************************************************************\n");
+
+    i = 0; 
+
+    for (; i < sys->numberHackers; i++){
+    
         int compared = comparisonRequireToAccept(sys->hackers[i]->wantedCoursesNum, sys->hackers[i]->gotCourseNum);
 
-        if (compared == 0 || compared == -1){// then there is a problem
+        printf("compared = %d\n",compared);
 
+        if (compared == 0 || compared == -1){// then there is a problem
 
             if (compared == 0){
 
                 fprintf(out,"Cannot satisfy constraints for %s",sys->hackers[i]->hacker->studentID);
-                return;//
+                return;
 
             }else if (compared == -1){
 
-                return;//
+                return;
             }
 
         }
 
-        i++;
-
     }
-	
-    //fopen(out,"w");
 
     for (i = 0; i < sys->numberCourses; i++){
 
-        fprintf(out, "%s ",sys->coursesQueue[i]->courseID);
+        if (sys->coursesQueue[i]->currentSize > 0){
+            
+            fprintf(out, "%s ",sys->coursesQueue[i]->courseID);
 
-        for (j = 0; j < sys->coursesQueue[i]->currentSize; j++){
+            for (j = 0; j < sys->coursesQueue[i]->currentSize; j++){
 
-            Student student = ReturnStudentFromQueueByIndex(sys->coursesQueue[i], j);
-            fprintf(out, "%s ",student->studentID);
+                Student student = ReturnStudentFromQueueByIndex(sys->coursesQueue[i], j);
+
+                fprintf(out, "%s ",student->studentID);
        
-        }
+            }
 
-        fprintf(out, "\n");
+            fprintf(out, "\n");
+
+        }
 
     }
    
 }
 
-int returnIndexOfCourseByID(CourseQueue *courseQueue, char *courseID){
+int returnIndexOfCourseByID(CourseQueue *courseQueue, char *courseID, int courseNum){
 
     if (courseID == NULL || courseQueue == NULL || strlen(courseID) == 0){
 
         return -1;
     }
 
-    int i = 0;
+    for (int i = 0; i < courseNum; i++){
 
-    while (courseQueue[i]){
+        FixToken(courseQueue[i]->courseID);
+        FixToken(courseID);
 
         if (strcmp(courseQueue[i]->courseID, courseID) == 0){
 
             return i;
         }
 
-        i++;
+        
     }
 
     return -1;
@@ -496,40 +571,87 @@ int returnIndexOfCourseByID(CourseQueue *courseQueue, char *courseID){
 
 bool ifHackerGetCourse(CourseQueue courseQueue ,Hacker hacker){
 
-    int i = 0;
 
-    while (i < courseQueue->courseSize){
+    if (courseQueue == NULL || hacker == NULL){
 
-        Student student = ReturnStudentFromQueueByIndex(courseQueue, i);
+        return false;
+    }
 
-        if (strcmp(hacker->hacker->studentID,student->studentID) == 0){
+    if (courseQueue->currentSize <= 0){
 
+        return false;
+    }
+
+    IsraeliQueue tempQueue = IsraeliQueueClone(courseQueue->studentQueue);
+
+    if (tempQueue == NULL){
+
+        return false;
+    }
+
+    printf("original and cloned queue before:\n");
+    PrintIsraeliQueue(courseQueue->studentQueue);
+    PrintIsraeliQueue(tempQueue);
+
+
+    int searchingIndex = 0;
+
+    if (courseQueue->currentSize > courseQueue->courseSize){
+
+        searchingIndex = courseQueue->courseSize;
+
+    }else { // courseQueue->currentSize <= courseQueue->courseSize
+
+        searchingIndex = courseQueue->currentSize;
+    }
+
+    for (int i = 0; i < searchingIndex; i++){
+
+        Item item = IsraeliQueueDequeue(tempQueue);
+        Student student = (Student)item;
+
+        if (strcmp(student->studentID, hacker->hacker->studentID) == 0){
+            
+
+            //printf("original and cloned queue after:\n");
+            //PrintIsraeliQueue(courseQueue->studentQueue);
+            //PrintIsraeliQueue(tempQueue);
+            free(tempQueue);
+            //PrintIsraeliQueue(courseQueue->studentQueue);
             return true;
         }
-    } 
+    }
 
+    free(tempQueue);
     return false;
+
 }
 
-bool getHackerInToTheRequiredCourses(CourseQueue *courseQueue, Hacker hacker){
+bool getHackerInToTheRequiredCourses(CourseQueue *courseQueue, Student hacker,char** wantedCourseID, int wantedCoursesNum, int coursesNum){
   
    int coursePlace = 0;
    
-   for (int i = 0; i < hacker->wantedCoursesNum; i++ ){
+   for (int i = 0; i < wantedCoursesNum; i++){
     
-        coursePlace = returnIndexOfCourseByID(courseQueue, hacker->wantedCoursesID[i]);
+        coursePlace = returnIndexOfCourseByID(courseQueue, wantedCourseID[i],coursesNum);
 
         if (coursePlace == -1){
-
+            
+            
+            printf("******************************\n");
+            printf("error in returnIndexOfCourseByID\n");
             return false;
         }
-
-
 
         if (IsraeliQueueEnqueue(courseQueue[coursePlace]->studentQueue, hacker) != ISRAELIQUEUE_SUCCESS){
-
+            
+            
+            printf("******************************\n");
+            printf("error in enqueue\n");
             return false;
         }
+
+        courseQueue[coursePlace]->currentSize++;
 
         // enqueue success
 
@@ -541,48 +663,93 @@ bool getHackerInToTheRequiredCourses(CourseQueue *courseQueue, Hacker hacker){
 
 int friendshipMeasureByFile(void *hacker, void* student){
 
-    
-    Hacker h = (Hacker)hacker;
+    printf("by friendshipMeasureByFile: ");
+
+    Student h = (Student)hacker;
     Student s = (Student)student;
 
-    for (int i = 0; i < h->numberFriend; i++){
+    if (h->ifHacker == false && s->ifHacker == false){
 
-        if (h->friends[i]->studentID == s->studentID){
-
-            return FRIENDSHIP_THRESHOLD;
-        }
+        return NEUTRAL_THRESHOLD;
     }
 
-    for (int i = 0; i < h->numberRival; i++ ){
+    if (h->ifHacker == true){
 
-        if (h->rivals[i]->studentID == s->studentID){
+        for (int i = 0; i < h->numberFriend; i++){
 
-            return RIVAL_THRESHOLD;
+            if (strcmp(h->friendsID[i] ,s->studentID) == 0){
 
+                printf("hacker %s is friend with student %s\n",h->studentID,s->studentID);
+                return FRIENDSHIP_THRESHOLD;
+            }
+        }
+
+
+        for (int i = 0; i < h->numberRival; i++){
+
+            if (strcmp(h->rivalsID[i],s->studentID) == 0){
+
+                printf("hacker %s is rival with student %s\n",h->studentID,s->studentID);
+                return RIVAL_THRESHOLD;
+
+            }
         }
 
     }
 
+    if (s->ifHacker == true){
+
+        for (int i = 0; i < s->numberFriend; i++){
+
+            if (strcmp(s->friendsID[i],h->studentID) == 0){
+
+                printf("hacker %s is friend with student %s\n",s->studentID,h->studentID);
+                return FRIENDSHIP_THRESHOLD;
+            }
+        }
+
+
+
+        for (int i = 0; i < s->numberRival; i++){
+
+            if (strcmp(s->rivalsID[i] , h->studentID) == 0){
+
+                printf("hacker %s is rival with student %s\n",s->studentID,h->studentID);
+                return RIVAL_THRESHOLD;
+
+            }
+        }
+
+    }
+
+    printf("nor friends nor rivals!\n");
     return NEUTRAL_THRESHOLD;
 }    
 
 int friendshipMeasureByID(void *hacker, void* student){
 
-    Hacker h = (Hacker)hacker;
+    printf("by friendshipMeasureByID: ");
+
+    Student h = (Student)hacker;
     Student s = (Student)student;
 
-    return (abs((atoi(h->hacker->studentID)) - (atoi(s->studentID))));
+    int difInAbs = (abs((atoi(h->studentID)) - (atoi(s->studentID))));
+
+    printf("diff in Abs between %s and %s is %d\n",h->studentID,s->studentID,difInAbs);
+
+    return difInAbs;
 }
 
 
 int upperToLower(int a){
     
-     if ( a > 64 && a < 91){
-                return (a - 34);
-            }
+    if ( a >= 65 && a <= 90){
+
+        return (a + 32);
+    }
+
     return a;
 }
-    
 
 
 int returnDiffAsciiName(char* hackerName, char* studentName, bool capitalLetter){
@@ -594,13 +761,18 @@ int returnDiffAsciiName(char* hackerName, char* studentName, bool capitalLetter)
     int hackerValueLetter = 0;
     int studentValueLetter = 0;
 
-
     for (;i < min(strlen(hackerName),strlen(studentName)); i++){
 
-            if (capitalLetter){
-             hackerValueLetter = upperToLower((int)hackerName[i]);
-             studentValueLetter = upperToLower((int)studentName[i]);
-            }
+        if (capitalLetter){
+
+            hackerValueLetter = upperToLower((int)hackerName[i]);
+            studentValueLetter = upperToLower((int)studentName[i]);
+
+        }else{
+
+            hackerValueLetter = (int)hackerName[i];
+            studentValueLetter = (int)studentName[i];
+        }
 
         diff = diff + abs(studentValueLetter-hackerValueLetter);
     }
@@ -610,22 +782,29 @@ int returnDiffAsciiName(char* hackerName, char* studentName, bool capitalLetter)
         while (i <= strlen(studentName)){
 
             if (capitalLetter){
-               studentValueLetter = upperToLower((int)studentName[i]);
 
-            diff = diff + studentValueLetter;
-            i++;
+                studentValueLetter = upperToLower((int)studentName[i]);
+                diff = diff + studentValueLetter;
+                i++;
+            }else{
+
+                diff = diff + (int)studentName[i];
+                i++;
+            }
         }
-        }
-    }
-     else {
+
+    }else{
 
         while (i <= strlen(hackerName)){
              
-             if (capitalLetter){
+            if (capitalLetter){
             
-             hackerValueLetter = upperToLower((int)hackerName[i]);
+                hackerValueLetter = upperToLower((int)hackerName[i]);
             
-             }  
+            }else{
+
+                hackerValueLetter = (int)hackerName[i];
+            }  
 
             diff = diff + hackerValueLetter;
             i++;
@@ -649,27 +828,33 @@ int min(int a, int b){
 
 int friendshipMeasureByName(void *hacker, void* student){
 
-    Hacker h = (Hacker)hacker;
+    printf("by friendshipMeasureByName: ");
+    Student h = (Student)hacker;
     Student s = (Student)student;
-    int diffName = returnDiffAsciiName(h->hacker->studentID, s->studentID, false);
-    int diffSurname = returnDiffAsciiName(h->hacker->surname, s->surname, false);
+    int diffName = returnDiffAsciiName(h->studentID, s->studentID, false);
+    int diffSurname = returnDiffAsciiName(h->surname, s->surname, false);
 
+    printf("diff is  %d\n",diffName+diffSurname);
     return (diffName+diffSurname);  
 
 }
 
 int friendshipMeasureByNameWithFlag(void *hacker, void* student){
 
-    Hacker h = (Hacker)hacker;
+    printf("by friendshipMeasureByNameWithFlag: ");
+    Student h = (Student)hacker;
     Student s = (Student)student;
-    int diffName = returnDiffAsciiName(h->hacker->studentID, s->studentID, true);
-    int diffSurname = returnDiffAsciiName(h->hacker->surname, s->surname, true);
+    int diffName = returnDiffAsciiName(h->studentID, s->studentID, true);
+    int diffSurname = returnDiffAsciiName(h->surname, s->surname, true);
+
+    printf("diff is %d\n",diffName+diffSurname);
 
     return (diffName+diffSurname);  
-
 }
 
 int ItemsComparisonFunction(void *student1, void *student2){
+
+    printf("by ItemsComparisonFunction: ");
 
   if (student1 == NULL || student2 == NULL){
 
@@ -696,11 +881,13 @@ int ItemsComparisonFunction(void *student1, void *student2){
 
   if (ifStudentID && ifTotalCredits && ifGPA && ifName && ifSurname && ifCity && ifDepartment){
 
+    printf("items equal\n");
     return 1; // equal
 
   }
 
-  return 0; // not equal
+    printf("items not equal\n");
+    return 0; // not equal
 
 }
 

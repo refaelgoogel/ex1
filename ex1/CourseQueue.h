@@ -14,7 +14,8 @@ typedef struct CourseQueue {
 } *CourseQueue;
 
 CourseQueue CourseQueueCreate(char *fileLine);
-CourseQueue InsertStudentsToCourseQueue(CourseQueue courseQueue, char *fileLine, Student *students);
+CourseQueue InsertStudentsToCourseQueue(CourseQueue courseQueue, char *fileLine, Student *students, int studentNum);
 void CourseQueueDestroy(CourseQueue curseQueue);
+void PrintCourse(CourseQueue curseQueue);
 
 #endif
