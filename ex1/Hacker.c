@@ -56,6 +56,14 @@ Hacker HackerCreate(Student *students,char **fileLine){
 
 
     char *secondLine = fileLine[1];
+    char *secondLineCopy = (char*)malloc(sizeof(char)*(strlen(secondLine)+1));
+    strcpy(secondLineCopy, secondLine);
+
+    if (secondLineCopy == NULL){
+
+        return NULL;
+    }
+
     int numberWantedCourses = 0;
 
     token = strtok(secondLine, " ");
@@ -67,7 +75,8 @@ Hacker HackerCreate(Student *students,char **fileLine){
         token = strtok(NULL, " ");
     }
 
-    secondLine = fileLine[1];
+    secondLine = secondLineCopy;
+    printf("second line is %s\n", secondLine);
 
     new_hacker->wantedCoursesID = (char**)malloc(sizeof(char*)*(numberWantedCourses+1));
 
@@ -81,16 +90,18 @@ Hacker HackerCreate(Student *students,char **fileLine){
 
     token = strtok(secondLine, " ");
 
+
     i = 0;
 
     while (token != NULL && strlen(token) > 0){
 
+        FixToken(token);
         new_hacker->wantedCoursesID[i] = token;
         token = strtok(NULL, " ");
         i++;
     }
 
-
+    free (secondLineCopy);
     // now we have the wanted courses ID and the number of wanted courses
 
     // now let's find the hacker's friends
