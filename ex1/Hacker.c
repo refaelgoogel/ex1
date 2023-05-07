@@ -23,6 +23,7 @@ Hacker HackerCreate(Student *students,char **fileLine){
 
 		
 	if (token == NULL){return NULL;}
+
     FixToken(token);
 
     int i = 0; 
@@ -137,10 +138,11 @@ Hacker HackerCreate(Student *students,char **fileLine){
     while (token != NULL && strlen(token) > 0){
 
         int j = 0;
-        bool flag = false;
-        FixToken(token);
 
-        while (students[j] != NULL){
+        FixToken(token);
+        bool flag = (strlen(token) == 0);
+
+        while (students[j] != NULL && strlen(token) > 0){
 
             if (strcmp(students[j]->studentID, token) == 0){
                 
@@ -172,6 +174,10 @@ Hacker HackerCreate(Student *students,char **fileLine){
     int numberRivals = 0;
 
     token = strtok(fourthLine, " ");
+    FixToken(token);
+
+    //printf("length of token %s is %d\n", token, strlen(token));
+    //printf("tokennnnnnnnnnnnn: %s\n", token);
 
     while (token != NULL && strlen(token) > 0){
 
@@ -185,6 +191,7 @@ Hacker HackerCreate(Student *students,char **fileLine){
 
     if (new_hacker->rivals == NULL){
 
+        
         return NULL;
     }
 
@@ -195,6 +202,7 @@ Hacker HackerCreate(Student *students,char **fileLine){
         return NULL;
     }
 
+    
 
     new_hacker->rivals[numberRivals] = NULL;
     new_hacker->hacker->rivalsID[numberRivals] = NULL;
@@ -211,10 +219,10 @@ Hacker HackerCreate(Student *students,char **fileLine){
     while (token != NULL && strlen(token) > 0){
 
         int j = 0;
-        bool flag = false;
         FixToken(token);
+        bool flag = (strlen(token) == 0);
 
-        while (students[j] != NULL){
+        while (students[j] != NULL && strlen(token) > 0){
 
             if (strcmp(students[j]->studentID, token) == 0){
                 
@@ -300,6 +308,7 @@ void PrintHacker(Hacker hacker){
 
 
     printf("\n ----------- rivals----------------------\n");
+
     for (int i = 0; i<hacker->numberRival; i++){
 
         PrintStudent(hacker->rivals[i]);

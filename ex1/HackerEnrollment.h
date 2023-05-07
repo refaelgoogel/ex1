@@ -60,6 +60,7 @@ Student* readFileStudent(FILE *studentFile, int studentNum, Student *students);
 Hacker* readFileHackers(FILE *hackerFile, int HackerNum, Hacker *hackers, Student *students);
 int returnDiffAsciiName(char* hackerName, char* studentName, bool capitalLetter);
 int GetLinesNum(FILE *file);
+int upperToLower(int a);
 
 
 #endif // HACKER_ENROLLMENT_H

@@ -268,6 +268,7 @@ Hacker* readFileHackers(FILE *hackerFile, int hackerNum, Hacker *hackers, Studen
 
     if (hackerFile == NULL || hackers == NULL){
 
+        printf("ERROR!, LINE 271\n");
         return NULL;
     }
 
@@ -289,7 +290,8 @@ Hacker* readFileHackers(FILE *hackerFile, int hackerNum, Hacker *hackers, Studen
                 len = 0;
 
             }else {
-
+                
+                printf("ERROR!, LINE 294\n");
                 return NULL;
             }
 
@@ -300,7 +302,8 @@ Hacker* readFileHackers(FILE *hackerFile, int hackerNum, Hacker *hackers, Studen
         //PrintHacker(hackers[i]);
 
         if (hackers[i] == NULL){
-
+            
+            printf("ERROR!, LINE 306\n");
             return NULL;
         }
 
@@ -708,8 +711,6 @@ int friendshipMeasureByFile(void *hacker, void* student){
             }
         }
 
-
-
         for (int i = 0; i < s->numberRival; i++){
 
             if (strcmp(s->rivalsID[i] , h->studentID) == 0){
@@ -740,10 +741,9 @@ int friendshipMeasureByID(void *hacker, void* student){
     return difInAbs;
 }
 
-
 int upperToLower(int a){
     
-    if ( a >= 65 && a <= 90){
+    if (a >= 65 && a <= 90){
 
         return (a + 32);
     }
@@ -758,8 +758,8 @@ int returnDiffAsciiName(char* hackerName, char* studentName, bool capitalLetter)
 
 	int i = 0;
 	int diff = 0;
-    int hackerValueLetter = 0;
-    int studentValueLetter = 0;
+    char hackerValueLetter = 0;
+    char studentValueLetter = 0;
 
     for (;i < min(strlen(hackerName),strlen(studentName)); i++){
 

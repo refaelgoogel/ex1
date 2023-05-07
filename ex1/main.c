@@ -5,6 +5,7 @@
 #include <math.h>
 #include "HackerEnrollment.h"
 
+
 int main(int argc, char *argv[]){
 
     if (argc > 7 || argc < 6){ printf("bad parameters\n"); return 1;}
