@@ -15,7 +15,8 @@
 					"source" : ".",
 					"targetIndexes" : 
 					[
-						0
+						0,
+						1
 					]
 				}
 			],
@@ -30,7 +31,8 @@
 					"name" : "ex1",
 					"targetIndexes" : 
 					[
-						0
+						0,
+						1
 					]
 				}
 			],
@@ -41,6 +43,13 @@
 					"id" : "ex1::@6890427a1f51a3e7e1df",
 					"jsonFile" : "target-ex1-Debug-3e09b1a5fd4c310f0a15.json",
 					"name" : "ex1",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "main::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-main-Debug-97536e1645fe721a6702.json",
+					"name" : "main",
 					"projectIndex" : 0
 				}
 			]
