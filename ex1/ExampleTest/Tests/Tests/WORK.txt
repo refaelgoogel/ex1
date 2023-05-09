@@ -1,0 +1,16 @@
+1 work - but print nothing
+2 work
+3 logic-problem
+4 logic-problem
+5 logic-problem
+6 logic-problem
+7 logic-problem
+8 logic-problem
+9 logic-problem
+10 logic-problem
+11 work
+12 running time throw
+13 work
+14 running time throw
+15 running time throw
+16 work

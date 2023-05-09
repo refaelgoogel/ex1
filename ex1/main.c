@@ -28,6 +28,7 @@ int main(int argc, char *argv[]){
 	char* I16 = ".\\IsraeliQueue C:\\Users\\refae\\Desktop\\mtm\\ex1\\ExampleTest\\Tests\\Tests\\Test16\\students.txt C:\\Users\\refae\\Desktop\\mtm\\ex1\\ExampleTest\\Tests\\Tests\\Test16\\courses.txt C:\\Users\\refae\\Desktop\\mtm\\ex1\\ExampleTest\\Tests\\Tests\\Test16\\hackers.txt C:\\Users\\refae\\Desktop\\mtm\\ex1\\ExampleTest\\Tests\\Tests\\Test16\\queues.txt C:\\Users\\refae\\Desktop\\mtm\\ex1\\ExampleTest\\Tests\\Tests\\Test16\\out.txt";
 	*/
 
+
     if (argc > 7 || argc < 6){ printf("bad parameters\n"); return 1;}
 
     bool nameFlag = false;
@@ -97,6 +98,8 @@ int main(int argc, char *argv[]){
     }
 
     // Open files
+
+    
 
     FILE *studentsFile = fopen(studentsPath, "r");
     FILE *coursesFile = fopen(coursesPath, "r");

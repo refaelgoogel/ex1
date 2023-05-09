@@ -128,12 +128,26 @@ ex1/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\ex1.dir\build.make CMakeFiles/ex1.dir/build
 .PHONY : ex1/fast
 
+#=============================================================================
+# Target rules for targets named main
+
+# Build rule for target.
+main: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 main
+.PHONY : main
+
+# fast build rule for target.
+main/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\main.dir\build.make CMakeFiles/main.dir/build
+.PHONY : main/fast
+
 main.obj: main.c.obj
 .PHONY : main.obj
 
 # target to build an object file
 main.c.obj:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\ex1.dir\build.make CMakeFiles/ex1.dir/main.c.obj
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\main.dir\build.make CMakeFiles/main.dir/main.c.obj
 .PHONY : main.c.obj
 
 main.i: main.c.i
@@ -142,6 +156,7 @@ main.i: main.c.i
 # target to preprocess a source file
 main.c.i:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\ex1.dir\build.make CMakeFiles/ex1.dir/main.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\main.dir\build.make CMakeFiles/main.dir/main.c.i
 .PHONY : main.c.i
 
 main.s: main.c.s
@@ -150,6 +165,7 @@ main.s: main.c.s
 # target to generate assembly for a file
 main.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\ex1.dir\build.make CMakeFiles/ex1.dir/main.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\main.dir\build.make CMakeFiles/main.dir/main.c.s
 .PHONY : main.c.s
 
 # Help Target
@@ -161,6 +177,7 @@ help:
 	@echo ... edit_cache
 	@echo ... rebuild_cache
 	@echo ... ex1
+	@echo ... main
 	@echo ... main.obj
 	@echo ... main.i
 	@echo ... main.s

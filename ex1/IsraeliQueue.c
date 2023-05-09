@@ -16,7 +16,8 @@ void MarkAsUnmerged(IsraeliQueue *qs);
 IsraeliQueueError ReallocateMoreSpace(IsraeliQueue q);
 int FriendshipFunctionNumberInQueueArray(IsraeliQueue *qs);
 FriendshipFunction* FriendshipFunctionFiller(IsraeliQueue *qs);
-Item IsraeliQueueDequeueByindex(IsraeliQueue q,int index);
+int FindIndex(IsraeliQueue q, Item item);
+IsraeliQueue IsraeliQueueDequeueByIndex(IsraeliQueue q,int index);
 
 struct IsraeliQueue_t{
 
@@ -59,6 +60,7 @@ void PrintIsraeliQueue(IsraeliQueue q){
     printf("\n--------End of IsraeliQUeue Print---------\n");
 
 }
+
 
 
 IsraeliQueue IsraeliQueueCreate(FriendshipFunction *friendshipFunctions, ComparisonFunction comparisonFunction, int friendship_th, int rivalry_th){
@@ -384,7 +386,9 @@ IsraeliQueueError IsraeliQueueEnqueue(IsraeliQueue q, void *item){
             }else{// enemy found
 
                 q->array[EnemyBlock]->blockedRivals++;
-                printf("item is blocked by enemies, continue searching for a friend in smaller distance!\n");
+                printf("ENEMY++\n");
+                //printf("ENEMY++!\n");
+                j = EnemyBlock;
                 continue; // continue searching for other friend
             }
         }
@@ -407,7 +411,7 @@ IsraeliQueueError IsraeliQueueEnqueue(IsraeliQueue q, void *item){
             q->array[i] = q->array[i-1];
         } 
 
-        printf("improve position in enqueue was successful!\n");
+        //printf("FRIEND++!\n");
         //printf("item[%d] = new_item;\n", swapIndex+1);
         q->array[swapIndex+1] = new_item;
         q->size++;
@@ -417,133 +421,6 @@ IsraeliQueueError IsraeliQueueEnqueue(IsraeliQueue q, void *item){
 
         return ISRAELIQUEUE_SUCCESS;
         
-    }
-	
-	
-
-}
-
-
-IsraeliQueueError IsraeliQueueImproveItemByIndex(IsraeliQueue q, int index){
-
-
-    if (q == NULL || q->array[index]->improvedPosition == true){
-        //printf("ERROR: IsraeliQueueEnqueue got NULL as a parameter!\n");
-        return ISRAELIQUEUE_BAD_PARAM;
-    }
-
-    IsraeliQueueError error = ReallocateMoreSpace(q);
-
-    if (error != ISRAELIQUEUE_SUCCESS){
-
-        //printf("ERROR: ReallocateMoreSpace in enqueue failed!\n");
-        return ISRAELIQUEUE_ALLOC_FAILED;
-    }
-
-    Item new_item = IsraeliQueueDequeueByindex(q,index);
-
-    if (new_item == NULL){
-
-        //printf("ERROR: ItemCreate in enqueue failed!\n");
-        return ISRAELIQUEUE_ALLOC_FAILED;
-    }
-
-    // let's divided into 2 cases:
-
-    // case 1: there is no friendship functions
-
-    if (q->size_of_friendship_functions == 0){ // enqueue like regular queue without trying to improve position
-
-        q->array[q->size] = new_item;
-        q->size++;
-        //printf("item number %d enqueued without friendships functions!\n", q->size);
-        q->array[q->size]->improvedPosition = true;
-        return ISRAELIQUEUE_SUCCESS;
-    }
-
-    // if we got here, there are friendship functions (because there is return in the previous if statement)
-    // case 2: there are friendship functions
-
-    if (q->size == 0){
-
-
-        q->array[0] = new_item;
-        q->size++;
-        q->array[0]->improvedPosition = true;
-        //printf("item number 1 enqueued!\n");
-        return ISRAELIQUEUE_SUCCESS;
-    }
-
-    q->array[q->size] = new_item;
-    //printf("q->array[%d] = new_item;\n", q->size);
-
-
-    int swapIndex = q->size;
-
-    //printf("checking if the item is friend of anyone...\n");
-
-    for (int j = 0; j < q->size; j++){
-
-        //printf("checking if the item is friend of item[%d]\n", j);
-
-        int FurtherFriend = IfExsistFurtherFriend(q, q->size, j);
-        //printf("index of FurtherFriend is %d\n", FurtherFriend);
-
-        if (FurtherFriend == -1){ // no friends have been found
-
-            swapIndex = q->size;
-            //printf("no friends have been found from item[%d] to item[%d]!\n",q->size, j);
-            break;
-
-        }else{ // friend found
-
-            //printf("item[%d] is a friend of the enqueued item!, checking if it is blocked by enemies...\n", FurtherFriend);
-            int EnemyBlock = IfEnemyBlocked(q, FurtherFriend, q->size);
-
-            if (EnemyBlock == -1){ // no enemies have been found
-
-                swapIndex = FurtherFriend;
-                //printf("not blocked by enemies, item[%d] is the new swapIndex!\n", FurtherFriend+1);
-                break;
-
-            }else{// enemy found
-
-                q->array[EnemyBlock]->blockedRivals++;
-                printf("item is blocked by enemies, continue searching for a friend in smaller distance!\n");
-                continue; // continue searching for other friend
-            }
-        }
-
-    }
-
-    if (swapIndex == q->size){ // if we get in, the item is not friend of anyone or friend of the last item
-
-        q->array[swapIndex] = new_item;
-        q->size++;
-        q->array[swapIndex]->improvedPosition = true;
-        //printf("item enqueue to the end of the queue, has no friends that can help!\n");
-        return ISRAELIQUEUE_SUCCESS;
-
-    } else { // if we get in, the item is friend of someone
-
-        //printf("item enqueue in the end of the queue, has friends that can help!\n");
-        for (int i = q->size ; i > (swapIndex+1) ; i--){ // shift all items to the right
-
-            //printf("shifting item[%d] to item[%d]\n", i-1, i);
-            q->array[i] = q->array[i-1];
-        }
-
-        printf("improve position in enqueue was successful!\n");
-        //printf("item[%d] = new_item;\n", swapIndex+1);
-        q->array[swapIndex+1] = new_item;
-        q->size++;
-        q->array[swapIndex+1]->improvedPosition = true;
-        q->array[swapIndex]->passedFriends++;
-
-        //printf("size now is %d\n", q->size);
-
-        return ISRAELIQUEUE_SUCCESS;
-
     }
 
 }
@@ -631,27 +508,6 @@ void* IsraeliQueueDequeue(IsraeliQueue q){
 
 }
 
-Item IsraeliQueueDequeueByindex(IsraeliQueue q,int index){
-
-    if (q == NULL || q->size == 0){
-
-        return NULL;
-    }
-
-    Item temp = q->array[index];
-
-    for (int i = index; i < q->size-1; i++){
-
-        q->array[i] = q->array[i+1];
-
-    }
-
-    q->array[q->size-1] = NULL;
-    q->size--;
-
-    return temp;
-}
-
 
 /**@param item: an object comparable to the objects in the IsraeliQueue
  *
@@ -737,46 +593,83 @@ int IfExsistFurtherFriend(IsraeliQueue q , int itemIndex, int StartingPosition){
 
 /**Advances each item in the queue to the foremost position accessible to it,
  * from the back of the queue frontwards.*/
-IsraeliQueueError IsraeliQueueImprovePositions(IsraeliQueue q){
 
-    if (q == NULL){
+IsraeliQueue IsraeliQueueDequeueByIndex(IsraeliQueue q,int index){
 
-        return ISRAELIQUEUE_BAD_PARAM;
+    if (q == NULL || q->size == 0){
+
+        return NULL;
     }
 
+    for (int i = index; i < q->size-1; i++){
 
-    else if (q->size == 0 || q->size == 1){ return ISRAELIQUEUE_SUCCESS;}
-
-
-    for (int j = 0; j < q->size; j++){
-
-        int p = 0;
-
-        for (p = (q->size - 1); p>=0; p--){
-
-            if (q->array[p]->improvedPosition == false){
-
-                break;
-
-            }
-        }
-
-        int ImproveCurrentItemIndex = p;
-
-        if (IsraeliQueueImproveItemByIndex(q,ImproveCurrentItemIndex) != ISRAELIQUEUE_SUCCESS){
-
-            return ISRAELI_QUEUE_ERROR;
-
-        }
+        q->array[i] = q->array[i+1];
 
     }
+
+    q->array[q->size-1] = NULL;
+    q->size--;
+
+    return q;
+}
+
+
+int FindIndex(IsraeliQueue q, Item item){
+
+    //printf("searching what item in q has the same value of the item->data = %p\n",item->data);
 
     for (int i = 0; i < q->size; i++){
 
-        q->array[i]->improvedPosition = false;
+        //printf("item->data = %p VS %p = q->array[%d]->data\n", item->data, q->array[i]->data,i);
+
+        if (q->array[i]->data == item->data){
+
+            //printf("they are equal!\n");
+            return i;
+
+        }
+
     }
 
+    return -1;
+
+}
+
+IsraeliQueueError IsraeliQueueImprovePositions(IsraeliQueue q){
+
+    int indexCurrentItem = 0;
+
+    IsraeliQueue qCopy = IsraeliQueueClone(q);
+
+    for (int i = ((q->size)-1); i >= 0; i--){
+
+        //printf("the index of %d in the queue is:",*(int*)qCopy->array[i]->data);
+        indexCurrentItem = FindIndex(q, qCopy->array[i]);
+        //printf("returned index is %d\n",indexCurrentItem);
+        q = IsraeliQueueDequeueByIndex(q, indexCurrentItem);
+
+        IsraeliQueueError error = IsraeliQueueEnqueue(q, qCopy->array[i]->data);
+        indexCurrentItem = FindIndex(q, qCopy->array[i]);
+
+        q->array[indexCurrentItem]->passedFriends = qCopy->array[i]->passedFriends;
+        q->array[indexCurrentItem]->blockedRivals = qCopy->array[i]->blockedRivals;
+
+        for (int j = 0; j<q->size; j++){
+
+            int index = FindIndex(q, qCopy->array[j]);
+            qCopy->array[j]->passedFriends = q->array[index]->passedFriends;
+            qCopy->array[j]->blockedRivals = q->array[index]->blockedRivals;
+
+        }
+
+        if (error != ISRAELIQUEUE_SUCCESS){
+            return ISRAELI_QUEUE_ERROR;
+        }
+    }
+
+    IsraeliQueueDestroy(qCopy);
     return ISRAELIQUEUE_SUCCESS;
+
 }
 
 
@@ -811,7 +704,7 @@ IsraeliQueue IsraeliQueueMerge(IsraeliQueue *qs ,ComparisonFunction f){
 
     while (qs[i] != NULL){
 
-        PrintIsraeliQueue(qs[i]);
+        //PrintIsraeliQueue(qs[i]);
         new_friendship_th += qs[i]->friendship_threshold;
         new_rivalry_th *= qs[i]->rivalry_threshold;
         i++;
@@ -834,7 +727,7 @@ IsraeliQueue IsraeliQueueMerge(IsraeliQueue *qs ,ComparisonFunction f){
         return NULL;
     }
 
-    PrintIsraeliQueue(new_queue);
+    //PrintIsraeliQueue(new_queue);
 
     // transfering items from qs to new_queue
 
