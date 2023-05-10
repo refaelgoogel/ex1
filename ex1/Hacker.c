@@ -142,7 +142,8 @@ Hacker SecondLineFunction(Hacker new_hacker, char *SecondLine){
     }
 
     char *CopySecondLine = (char*)malloc(sizeof(char)*(strlen(SecondLine)+1));
-     if (CopySecondLine == NULL){
+
+    if (CopySecondLine == NULL){
 
         return NULL;
     }
@@ -170,26 +171,24 @@ Hacker SecondLineFunction(Hacker new_hacker, char *SecondLine){
     new_hacker->wantedCoursesID[numberWantedCourses] = NULL;
     new_hacker->wantedCoursesNum = numberWantedCourses;
 
+
     int i = 0;
 
     char *token = strtok(CopySecondLine, " ");
-    new_hacker->wantedCoursesID[i] = (char*)malloc(sizeof(char)*(strlen(token)+1));
-    if (new_hacker->wantedCoursesID[i] == NULL){
-
-        free(CopySecondLine);
-        return NULL;
-    }
-    strcpy(new_hacker->wantedCoursesID[i], token);
 
     while (token != NULL && strlen(token) > 0){
 
+        printf("token is: %s\n", token);
+
         new_hacker->wantedCoursesID[i] = (char*)malloc(sizeof(char)*(strlen(token)+1));
+
         if (new_hacker->wantedCoursesID[i] == NULL){
 
             free(CopySecondLine);
             return NULL;
         }
         strcpy(new_hacker->wantedCoursesID[i], token);
+        printf("new_hacker->wantedCoursesID[i] is: %s\n", new_hacker->wantedCoursesID[i]);
 
         token = strtok(NULL, " ");
         i++;
@@ -197,6 +196,9 @@ Hacker SecondLineFunction(Hacker new_hacker, char *SecondLine){
 
 
     free(CopySecondLine);
+
+    PrintHacker(new_hacker);
+
     return new_hacker;
 
 }
@@ -448,7 +450,6 @@ int GetNumberSafe(char *line){
     free(lineCopy);
     free(line);
 
-    printf("number of words in courses line (number of hacker wanted courses): %d\n", number);
     return number;
 }
 

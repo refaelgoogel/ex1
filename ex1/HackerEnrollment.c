@@ -61,7 +61,6 @@ enrollmentSystem createEnrollmentSystem(FILE* students, FILE* courses, FILE* hac
     if (new_system == NULL){
 
         printf("ERROR: malloc failed in 62 line\n");
-        free(new_system);
         return NULL;
     }
 
@@ -182,7 +181,7 @@ enrollmentSystem createEnrollmentSystem(FILE* students, FILE* courses, FILE* hac
 
     new_system->nameFlag = false;
 
-
+    PrintSystem(new_system);
     return new_system;
  }
 
@@ -349,10 +348,6 @@ enrollmentSystem readEnrollment(enrollmentSystem sys, FILE* queues){
         char *courseID = strtok(temp1, " ");
         trim(courseID);
 
-        for (int i = 0; i < sys->numberCourses; i++){
-
-            PrintCourse(sys->coursesQueue[i]);
-        }
 
         int indexOfCourse = returnIndexOfCourseByID(sys->coursesQueue, courseID, sys->numberCourses);
 
@@ -527,8 +522,6 @@ bool ifHackerGetCourse(CourseQueue courseQueue ,Hacker hacker){
         return false;
     }
 
-    PrintIsraeliQueue(courseQueue->studentQueue);
-    PrintIsraeliQueue(tempQueue);
 
 
     int searchingIndex = 0;
