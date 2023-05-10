@@ -485,26 +485,44 @@ void HackerDestroy(Hacker hacker){
 }
 
 
-void trim(char* str){
+void trim(char* str) {
 
 
-    char *end = NULL;
+    int start = 0;
+    int end = strlen(str) - 1;
 
-  // Trim leading space
-  while(isspace((unsigned char)*str)) str++;
+    // Find the first non-whitespace character from the start
+    while (str[start] != '\0' && (str[start] == ' ' || str[start] == '\t' || str[start] == '\n')) {
+        start++;
+    }
 
-  if(*str == 0)  // All spaces?
-    return str;
+    // Find the first non-whitespace character from the end
+    while (end >= 0 && (str[end] == ' ' || str[end] == '\t' || str[end] == '\n')) {
+        end--;
+    }
 
-  // Trim trailing space
-  end = str + strlen(str) - 1;
-  while(end > str && isspace((unsigned char)*end)) end--;
+    // Shift the remaining characters to the beginning of the string
+    int length = end - start + 1;
+    memmove(str, &str[start], length);
+    str[length] = '\0';
 
-  // Write new null terminator character
-  end[1] = '\0';
+}
 
-  //return str;
+void FixToken(char *token){
 
+    if (token == NULL || strlen(token) == 0){
+
+        return;
+    }
+
+    if (token[strlen(token)-1] == 10){
+
+        token[strlen(token)-1] = '\0';
+            
+    }else if (token[0] == 10){
+
+        token[0] = '\0';
+    }
 }
 
 void PrintHacker(Hacker hacker){
