@@ -31,6 +31,7 @@ Hacker ThirdLineFunction(Hacker new_hacker ,char *thirdLine, Student *students);
 Hacker FourthLineFunction(Hacker new_hacker ,char *fourthLine, Student *students);
 void HackerDestroy(Hacker curseQueue);
 void FixToken(char *token);
+void trim(char* str);
 void PrintHacker(Hacker hacker);
 
 

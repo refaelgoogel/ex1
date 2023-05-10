@@ -84,12 +84,13 @@ Hacker FirstLineFunction(Hacker new_hacker ,char *firstLine, int studentNum, Stu
     }
 
     char *CopyFirstLine = (char*)malloc(sizeof(char)*(strlen(firstLine)+1));
-    strcpy(CopyFirstLine, firstLine);
 
     if (CopyFirstLine == NULL){
 
         return NULL;
     }
+
+    strcpy(CopyFirstLine, firstLine);
 
     char *token = strtok(CopyFirstLine, " ");
 		
@@ -99,7 +100,7 @@ Hacker FirstLineFunction(Hacker new_hacker ,char *firstLine, int studentNum, Stu
         return NULL;
     }
 
-    FixToken(token);
+    trim(token);
 
     int i = 0;
     bool flag = false;
@@ -121,8 +122,8 @@ Hacker FirstLineFunction(Hacker new_hacker ,char *firstLine, int studentNum, Stu
         return NULL;
     }
 
+    free(CopyFirstLine);
     return new_hacker;
-
 
 }
 
@@ -133,18 +134,27 @@ Hacker SecondLineFunction(Hacker new_hacker, char *SecondLine){
         return NULL;
     }
 
-    char *CopySecondLine = (char*)malloc(sizeof(char)*(strlen(SecondLine)+1));
-    strcpy(CopySecondLine, SecondLine);
+    if (strlen(SecondLine) == 0){
+        
+        new_hacker->wantedCoursesID = NULL;
+        new_hacker->wantedCoursesNum = 0;
+        return new_hacker;
+    }
 
-    if (CopySecondLine == NULL){
+    char *CopySecondLine = (char*)malloc(sizeof(char)*(strlen(SecondLine)+1));
+     if (CopySecondLine == NULL){
 
         return NULL;
     }
+    strcpy(CopySecondLine, SecondLine);
+
 
     int numberWantedCourses = GetNumberSafe(CopySecondLine);
 
-    if (numberWantedCourses == -1){
+    if (numberWantedCourses == -1 || numberWantedCourses == 0){
 
+        new_hacker->wantedCoursesID = NULL;
+        new_hacker->wantedCoursesNum = 0;
         free(CopySecondLine);
         return NULL;
     }
@@ -160,17 +170,33 @@ Hacker SecondLineFunction(Hacker new_hacker, char *SecondLine){
     new_hacker->wantedCoursesID[numberWantedCourses] = NULL;
     new_hacker->wantedCoursesNum = numberWantedCourses;
 
-    char *token = strtok(CopySecondLine, " ");
-
     int i = 0;
+
+    char *token = strtok(CopySecondLine, " ");
+    new_hacker->wantedCoursesID[i] = (char*)malloc(sizeof(char)*(strlen(token)+1));
+    if (new_hacker->wantedCoursesID[i] == NULL){
+
+        free(CopySecondLine);
+        return NULL;
+    }
+    strcpy(new_hacker->wantedCoursesID[i], token);
 
     while (token != NULL && strlen(token) > 0){
 
-        new_hacker->wantedCoursesID[i] = token;
+        new_hacker->wantedCoursesID[i] = (char*)malloc(sizeof(char)*(strlen(token)+1));
+        if (new_hacker->wantedCoursesID[i] == NULL){
+
+            free(CopySecondLine);
+            return NULL;
+        }
+        strcpy(new_hacker->wantedCoursesID[i], token);
+
         token = strtok(NULL, " ");
         i++;
     }
 
+
+    free(CopySecondLine);
     return new_hacker;
 
 }
@@ -182,20 +208,35 @@ Hacker ThirdLineFunction(Hacker new_hacker ,char *thirdLine, Student *students){
         return NULL;
     }
 
-    char *CopyThirdLine = (char*)malloc(sizeof(char)*(strlen(thirdLine)+1));
-    strcpy(CopyThirdLine, thirdLine);
+    if (strlen(thirdLine) == 0){
 
+        new_hacker->friends = NULL;
+        new_hacker->numberFriend = 0;
+    
+        new_hacker->hacker->friendsID = NULL;
+        new_hacker->hacker->numberFriend = 0;
+        
+        return new_hacker;
+    }
+
+    char *CopyThirdLine = (char*)malloc(sizeof(char)*(strlen(thirdLine)+1));
     if (CopyThirdLine == NULL){
 
         return NULL;
     }
+    strcpy(CopyThirdLine, thirdLine);
 
     int numberFriends = GetNumberSafe(CopyThirdLine);
 
-    if (numberFriends == -1){
+    if (numberFriends == -1 || numberFriends == 0){
 
+        new_hacker->friends = NULL;
+        new_hacker->numberFriend = 0;
+    
+        new_hacker->hacker->friendsID = NULL;
+        new_hacker->hacker->numberFriend = 0;
         free(CopyThirdLine);
-        return NULL;
+        return new_hacker;
     }
 
     new_hacker->friends = (Student*)malloc(sizeof(Student)*(numberFriends+1));
@@ -220,7 +261,9 @@ Hacker ThirdLineFunction(Hacker new_hacker ,char *thirdLine, Student *students){
     new_hacker->numberFriend = numberFriends;
     new_hacker->hacker->numberFriend = numberFriends;
 
+
     char *token = strtok(CopyThirdLine, " ");
+
     bool flag = false;
     int i = 0;
 
@@ -228,7 +271,7 @@ Hacker ThirdLineFunction(Hacker new_hacker ,char *thirdLine, Student *students){
 
         int j = 0;
 
-        FixToken(token);
+        trim(token);
 
         flag = (strlen(token) == 0);
 
@@ -237,7 +280,14 @@ Hacker ThirdLineFunction(Hacker new_hacker ,char *thirdLine, Student *students){
             if (strcmp(students[j]->studentID, token) == 0){
                 
                 new_hacker->friends[i] = students[j];
-                new_hacker->hacker->friendsID[i++] = students[j]->studentID;
+                new_hacker->hacker->friendsID[i] = (char*)malloc(sizeof(char)*(strlen(students[j]->studentID)+1));
+                if (new_hacker->hacker->friendsID[i] == NULL){
+
+                    free(CopyThirdLine);
+                    return NULL;
+                }
+                strcpy(new_hacker->hacker->friendsID[i], students[j]->studentID);
+                i++;
                 flag = true;
                 break;
             }
@@ -248,7 +298,7 @@ Hacker ThirdLineFunction(Hacker new_hacker ,char *thirdLine, Student *students){
         if (!flag){
 
             free(CopyThirdLine);
-            return NULL;
+            return new_hacker;
         }
 
         flag = false;
@@ -267,23 +317,38 @@ Hacker FourthLineFunction(Hacker new_hacker, char *fourthLine, Student* students
         return NULL;
     }
 
-    char *CopyFourthLine = (char*)malloc(sizeof(char)*(strlen(fourthLine)+1));
-    strcpy(CopyFourthLine, fourthLine);
+    if (strlen(fourthLine) == 0){
 
+        new_hacker->rivals = NULL;
+        new_hacker->numberRival = 0;
+    
+        new_hacker->hacker->rivalsID = NULL;
+        new_hacker->hacker->numberRival = 0;
+        
+        return new_hacker;
+    }
+
+    char *CopyFourthLine = (char*)malloc(sizeof(char)*(strlen(fourthLine)+1));
     if (CopyFourthLine == NULL){
 
         return NULL;
     }
+    strcpy(CopyFourthLine, fourthLine);
 
-    int numberRivals = GetNumberSafe(CopyFourthLine);
+    int numberRival = GetNumberSafe(CopyFourthLine);
 
-    if (numberRivals == -1){
+    if (numberRival == -1 || numberRival == 0){
 
+        new_hacker->rivals = NULL;
+        new_hacker->numberRival = 0;
+    
+        new_hacker->hacker->rivalsID = NULL;
+        new_hacker->hacker->numberRival = 0;
         free(CopyFourthLine);
-        return NULL;
+        return new_hacker;
     }
 
-    new_hacker->rivals = (Student*)malloc(sizeof(Student)*(numberRivals+1));
+    new_hacker->rivals = (Student*)malloc(sizeof(Student)*(numberRival+1));
 
     if (new_hacker->rivals == NULL){
 
@@ -291,7 +356,7 @@ Hacker FourthLineFunction(Hacker new_hacker, char *fourthLine, Student* students
         return NULL;
     }
 
-    new_hacker->hacker->rivalsID = (char**)malloc(sizeof(char*)*(numberRivals+1));
+    new_hacker->hacker->rivalsID = (char**)malloc(sizeof(char*)*(numberRival+1));
 
     if (new_hacker->hacker->rivalsID == NULL){
 
@@ -299,13 +364,14 @@ Hacker FourthLineFunction(Hacker new_hacker, char *fourthLine, Student* students
         return NULL;
     }
 
-    new_hacker->rivals[numberRivals] = NULL;
-    new_hacker->hacker->rivalsID[numberRivals] = NULL;
+    new_hacker->rivals[numberRival] = NULL;
+    new_hacker->hacker->rivalsID[numberRival] = NULL;
 
-    new_hacker->numberRival = numberRivals;
-    new_hacker->hacker->numberRival = numberRivals;
+    new_hacker->numberRival = numberRival;
+    new_hacker->hacker->numberRival = numberRival;
 
-    char* token = strtok(CopyFourthLine, " ");
+
+    char *token = strtok(CopyFourthLine, " ");
 
     bool flag = false;
     int i = 0;
@@ -313,7 +379,9 @@ Hacker FourthLineFunction(Hacker new_hacker, char *fourthLine, Student* students
     while (token != NULL && strlen(token) > 0){
 
         int j = 0;
-        FixToken(token);
+
+        trim(token);
+
         flag = (strlen(token) == 0);
 
         while (students[j] != NULL && strlen(token) > 0){
@@ -321,7 +389,14 @@ Hacker FourthLineFunction(Hacker new_hacker, char *fourthLine, Student* students
             if (strcmp(students[j]->studentID, token) == 0){
                 
                 new_hacker->rivals[i] = students[j];
-                new_hacker->hacker->rivalsID[i++] = students[j]->studentID;
+                new_hacker->hacker->rivalsID[i] = (char*)malloc(sizeof(char)*(strlen(students[j]->studentID)+1));
+                if (new_hacker->hacker->rivalsID[i] == NULL){
+
+                    free(CopyFourthLine);
+                    return NULL;
+                }
+                strcpy(new_hacker->hacker->rivalsID[i], students[j]->studentID);
+                i++;
                 flag = true;
                 break;
             }
@@ -332,7 +407,7 @@ Hacker FourthLineFunction(Hacker new_hacker, char *fourthLine, Student* students
         if (!flag){
 
             free(CopyFourthLine);
-            return NULL;
+            return new_hacker;
         }
 
         flag = false;
@@ -362,7 +437,7 @@ int GetNumberSafe(char *line){
 
     char* token = strtok(lineCopy, " ");
 
-    FixToken(token);
+    trim(token);
 
     while (token != NULL && strlen(token) > 0){
 
@@ -372,9 +447,10 @@ int GetNumberSafe(char *line){
 
     free(lineCopy);
     free(line);
+
+    printf("number of words in courses line (number of hacker wanted courses): %d\n", number);
     return number;
 }
-
 
 
 void HackerDestroy(Hacker hacker){
@@ -384,28 +460,51 @@ void HackerDestroy(Hacker hacker){
         return;
     }
 
+    studentDestroy(hacker->hacker);
+
+    for (int i = 0; i< hacker->wantedCoursesNum; i++){
+
+        free(hacker->wantedCoursesID[i]);
+    }
     free(hacker->wantedCoursesID);
+
+
+    for (int i = 0; i< hacker->numberFriend; i++){
+
+        studentDestroy(hacker->friends[i]);
+    }
     free(hacker->friends);
+
+    for (int i = 0; i< hacker->numberRival; i++){
+
+        studentDestroy(hacker->rivals[i]);
+    }
     free(hacker->rivals);
 
     free(hacker);
 }
 
-void FixToken(char *token){
 
-    if (token == NULL || strlen(token) == 0){
+void trim(char* str){
 
-        return;
-    }
 
-    if (token[strlen(token)-1] == 10){
+    char *end = NULL;
 
-        token[strlen(token)-1] = '\0';
-            
-    }else if (token[0] == 10){
+  // Trim leading space
+  while(isspace((unsigned char)*str)) str++;
 
-        token[0] = '\0';
-    }
+  if(*str == 0)  // All spaces?
+    return str;
+
+  // Trim trailing space
+  end = str + strlen(str) - 1;
+  while(end > str && isspace((unsigned char)*end)) end--;
+
+  // Write new null terminator character
+  end[1] = '\0';
+
+  //return str;
+
 }
 
 void PrintHacker(Hacker hacker){

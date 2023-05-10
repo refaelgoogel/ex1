@@ -47,7 +47,7 @@ bool ifCourseExist(int courseNumber);
 bool ifHackerGetCourse(CourseQueue courseQueue ,Hacker h);
 int returnIndexOfCourseByID(CourseQueue *courseQueue, char *courseID, int coursesNum);
 int comparisonRequireToAccept(int requireCourses, int accepteCourses);
-bool getHackerInToTheRequiredCourses(CourseQueue *courseQueue, Student hacker,char** wantedCourseID, int wantedCoursesNum, int coursesNum);
+bool getHackerInToTheRequiredCourses(CourseQueue *courseQueue, Hacker hacker,char** wantedCourseID, int wantedCoursesNum, int coursesNum);
 void SetNameFlag(enrollmentSystem sys, bool flag);
 
 int friendshipMeasureByFile(void *hacker, void* student);
@@ -55,11 +55,10 @@ int friendshipMeasureByID(void *hacker, void* student);
 int friendshipMeasureByName(void *hacker, void* student);
 int friendshipMeasureByNameWithFlag(void *hacker, void* student);
 int ItemsComparisonFunction(void *student1, void *student2);
-CourseQueue* readFileCourses(FILE *coursesFile, int coursesNum, CourseQueue *coursesQueue);
-Student* readFileStudent(FILE *studentFile, int studentNum, Student *students);
-Hacker* readFileHackers(FILE *hackerFile, int hackerNum, Hacker *hackers, Student *students, int studentNum);
+CourseQueue* readFileCourses(char** coursesLines, int coursesNum, CourseQueue *coursesQueue);
+Student* readFileStudent(char** studentLines, int studentNum, Student *students);
+Hacker* readFileHackers(char** hackerLines, int hackerNum, Hacker *hackers, Student *students, int studentNum);
 int returnDiffAsciiName(char* hackerName, char* studentName, bool capitalLetter);
-int GetLinesNum(FILE *file);
 int upperToLower(int a);
 
 

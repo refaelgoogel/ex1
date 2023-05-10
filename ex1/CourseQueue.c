@@ -4,11 +4,6 @@
 
 CourseQueue CourseQueueCreate(char *fileLine){
 	
-	if (fileLine == NULL || strlen(fileLine) == 0) {
-		
-		return NULL;
-	}
-	
 	CourseQueue new_CourseQueue = (CourseQueue)malloc(sizeof(*new_CourseQueue));
 
 	if (new_CourseQueue == NULL){
@@ -17,12 +12,24 @@ CourseQueue CourseQueueCreate(char *fileLine){
 	}
 
 	new_CourseQueue->studentQueue = NULL;
+
+	char *temp = (char*)malloc(sizeof(char)*(strlen(fileLine)+1));
+	strcpy(temp, fileLine);
+
+	if (temp == NULL){
 	
-	char *token = strtok(fileLine, " ");
+		return NULL;
+	}
+	
+	char *token = strtok(temp, " ");
 		
 	if (token == NULL){return NULL;}
 	
-	new_CourseQueue->courseID = token;
+	new_CourseQueue->courseID = (char*)malloc(sizeof(char)*(strlen(token)+1));
+
+	if (new_CourseQueue->courseID == NULL){return NULL;}
+	strcpy(new_CourseQueue->courseID, token);
+
 			
     token = strtok(NULL, " ");
 
@@ -31,10 +38,12 @@ CourseQueue CourseQueueCreate(char *fileLine){
 	new_CourseQueue->courseSize = atoi(token); 
 	new_CourseQueue->currentSize = 0;
 
-	// 
+
 	new_CourseQueue->studentQueue = (IsraeliQueue)malloc(sizeof(IsraeliQueue));
     
 	if (new_CourseQueue->studentQueue == NULL){return NULL;}
+
+	free(temp);
 
 	return new_CourseQueue;
 	
@@ -64,8 +73,8 @@ CourseQueue InsertStudentsToCourseQueue(CourseQueue courseQueue, char *fileLine,
 		
 		for (int i = 0; i < studentNum; i++){ // running on all over the students
 
-			FixToken(students[i]->studentID);
-			FixToken(token);
+			trim(students[i]->studentID);
+			trim(token);
 		
 			if (strcmp(students[i]->studentID, token) == 0){ // we found the student
 
@@ -96,13 +105,16 @@ CourseQueue InsertStudentsToCourseQueue(CourseQueue courseQueue, char *fileLine,
 
 void  CourseQueueDestroy(CourseQueue curseQueue){
     
+	if (curseQueue == NULL){return;}
+
+	free(curseQueue->courseID);
 	IsraeliQueueDestroy(curseQueue->studentQueue);
 }
 
 
 void PrintCourse(CourseQueue curseQueue){
 
-	printf("--------Course print---------\n");
+	printf("\n--------Course print---------\n");
 
 	printf("courseID: %s\n",curseQueue->courseID);
 	printf("course size: %d\n",curseQueue->courseSize);
@@ -110,6 +122,6 @@ void PrintCourse(CourseQueue curseQueue){
 	PrintIsraeliQueue(curseQueue->studentQueue);
 	
 
-	printf("-------- End of course---------\n");
+	printf("\n-------- End of course---------\n");
 	
 }

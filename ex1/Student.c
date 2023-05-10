@@ -17,47 +17,54 @@ Student studentCreate(char *fileLine){
 
   }
 
-  char *token = strtok(fileLine, " ");
+  char* temp = (char*)malloc(sizeof(char)*(strlen(fileLine)+1));
+  if (temp == NULL){return NULL;}
+  strcpy(temp, fileLine);
+
+
+  char *token = strtok(temp, " ");
         
   if (token == NULL){return NULL;}
+
+  new_student->studentID = malloc(sizeof(char)*(strlen(token)+1));
+  if (new_student->studentID == NULL){return NULL;}
+  strcpy(new_student->studentID, token);
     
-  new_student->studentID = token;
-
   token = strtok(NULL, " ");
-
   if (token == NULL || atoi(token) < 0 ){return NULL;}
-
   new_student->totalCredits = atoi(token);
 
   token = strtok(NULL, " ");
-
   if (token == NULL || atoi(token) < 0 || atoi(token) > 100 ){return NULL;}
-    
   new_student->gpa = atoi(token);
 
   token = strtok(NULL, " ");
-
   if (token == NULL ){return NULL;}
 
-  new_student->name = token;
+  new_student->name = malloc(sizeof(char)*(strlen(token)+1));
+  if (new_student->name == NULL){return NULL;}
+  strcpy(new_student->name, token);
 
   token = strtok(NULL, " ");
-
   if (token == NULL ){return NULL;}
 
-  new_student->surname = token;
+  new_student->surname = malloc(sizeof(char)*(strlen(token)+1));
+  if (new_student->surname == NULL){return NULL;}
+  strcpy(new_student->surname, token);
 
   token = strtok(NULL, " ");
-
   if (token == NULL ){return NULL;}
-
-  new_student->city = token;
+  new_student->city = malloc(sizeof(char)*(strlen(token)+1));
+  if (new_student->city == NULL){return NULL;}
+  strcpy(new_student->city, token);
 
   token = strtok(NULL, " ");
-
   if (token == NULL ){return NULL;}
+  new_student->department = malloc(sizeof(char)*(strlen(token)+1));
+  if (new_student->department == NULL){return NULL;} 
+  strcpy(new_student->department, token);
 
-  new_student->department = token;
+  free(temp);
 
   new_student->ifHacker = false;
   new_student->friendsID = NULL;
@@ -73,8 +80,26 @@ void studentDestroy(Student student){
   
     if (student == NULL) return;
 
-    free(student->friendsID);
-    free(student->rivalsID);
+    free(student->studentID);
+    free(student->name);
+    free(student->surname);
+    free(student->city);
+    free(student->department);
+
+
+    for (int i = 0; i < student->numberFriend; i++){
+
+        free(student->friendsID[i]);
+    }
+
+    free (student->friendsID);
+
+    for (int i = 0; i < student->numberRival; i++){
+
+        free(student->rivalsID[i]);
+    }
+
+    free (student->rivalsID);
 
     return; // this function is empty because we don't need to free the memory of the student struct
 }

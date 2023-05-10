@@ -114,17 +114,15 @@ int main(int argc, char *argv[]){
     }
 
     enrollmentSystem enSystem = createEnrollmentSystem(studentsFile, coursesFile, hackersFile);
-    printf("enSystem created\n");
+
     if (enSystem == NULL){
 
         // error
         return 1;
     }
 
-
     SetNameFlag(enSystem, nameFlag);
 
-    printf("nameFlag set\n");
 
     readEnrollment(enSystem, queuesFile);
     printf("enrollment read\n");

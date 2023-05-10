@@ -1,11 +1,9 @@
-#define _GNU_SOURCE
 #include "HackerEnrollment.h"
 #include "Item.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
-
 
 #define FRIENDSHIP_THRESHOLD 20
 #define RIVAL_THRESHOLD -20
@@ -17,17 +15,19 @@ int friendshipMeasureByID(void *hacker, void* student);
 int friendshipMeasureByName(void *hacker, void* student);
 int friendshipMeasureByNameWithFlag(void *hacker, void* student);
 int ItemsComparisonFunction(void *student1, void *student2);
-CourseQueue* readFileCourses(FILE* coursesFile, int coursesNum, CourseQueue *coursesQueue);
-Student* readFileStudent(FILE *studentFile, int studentNum, Student *students);
-Hacker* readFileHackers(FILE *hackerFile, int hackerNum, Hacker *hackers, Student *students, int studentNum);
+CourseQueue* readFileCourses(char** coursesLines, int coursesNum, CourseQueue *coursesQueue);
+Student* readFileStudent(char** studentLines, int studentNum, Student *students);
+Hacker* readFileHackers(char** hackerLines, int hackerNum, Hacker *hackers, Student *students, int studentNum);
 int returnDiffAsciiName(char* hackerName, char* studentName, bool capitalLetter);
-int GetLinesNum(FILE *file);
 int min(int a, int b);
 Student ReturnStudentFromQueueByIndex(CourseQueue courseQueue, int index);
+char* readLine(FILE* file);
+char** readFileLines(FILE* file, int* referenceToLineNumber);
 
 void PrintSystem(enrollmentSystem sys){
 
-    printf("--------SYSTEM PRINT---------\n");
+    printf("\n\n");
+    printf("\n------------SYSTEM PRINT------------\n");
 
 
     printf("number of courses: %d\n",sys->numberCourses);
@@ -47,8 +47,8 @@ void PrintSystem(enrollmentSystem sys){
         PrintHacker(sys->hackers[i]);
     }
 
-    printf("--------END OF SYSTEM PRINT---------\n");
-
+    printf("-------------END OF SYSTEM PRINT-------------\n");
+    printf("\n\n");
    
 }
 
@@ -57,51 +57,81 @@ enrollmentSystem createEnrollmentSystem(FILE* students, FILE* courses, FILE* hac
 
     enrollmentSystem new_system = (enrollmentSystem)malloc(sizeof(*new_system));
 
+
     if (new_system == NULL){
 
+        printf("ERROR: malloc failed in 62 line\n");
+        free(new_system);
         return NULL;
     }
 
     // malloc OK
 
+    // initializing the files inside the enrollmentSystem
     new_system->courses_file = courses;
     new_system->students_file = students;
     new_system->hackers_file = hackers;
-   
-    int numberCourses = GetLinesNum(new_system->courses_file);
 
+
+
+    // GETTING STUDETNS
+
+    int numberStudents = 0;
+    char **studentsLines = readFileLines(new_system->students_file, &numberStudents);
+    if (studentsLines == NULL){
+        printf("ERROR: malloc failed in 80 line\n");
+        return NULL;
+    }
+    new_system->numberStudents = numberStudents;
+
+    // GETTING COURSES 
+    int numberCourses = 0;
+    char** coursesLines = readFileLines(new_system->courses_file, &numberCourses);
+
+    if (coursesLines == NULL){
+
+        printf("ERROR: malloc failed in 90 line\n");
+        return NULL;
+    }
     new_system->numberCourses = numberCourses;
 
-    int numberStudents = GetLinesNum(new_system->students_file);
 
-    int numberHackers = GetLinesNum(new_system->hackers_file);
+    // GETTING HACKERS
+    int numberHackers = 0;
+    char** hackersLine = readFileLines(new_system->hackers_file, &numberHackers);
 
-    numberHackers = numberHackers/4; // because each hacker has 4 lines
+    if (hackersLine == NULL){
+
+        printf("ERROR: malloc failed in 100 line\n");
+        return NULL;
+    }
+
+    numberHackers = numberHackers/4; // EACH HACKER HAS 4 LINES
     new_system->numberHackers = numberHackers;
     
-    new_system->coursesQueue = (CourseQueue*)malloc(sizeof(CourseQueue)*(numberCourses+1));
 
+    // CREATING THE COURSES QUEUE
+    new_system->coursesQueue = (CourseQueue*)malloc(sizeof(CourseQueue)*(numberCourses+1));
     if (new_system->coursesQueue == NULL){
 
+        printf("ERROR: malloc failed in 111 line\n");
         return NULL;
     }
-
     new_system->coursesQueue[numberCourses] = NULL;
 
-    // creting CourseQueue
-
-    new_system->coursesQueue = readFileCourses(new_system->courses_file, numberCourses, new_system->coursesQueue);
+    // READS THE COURSES FROM THE FILE AND CREATES THE COURSES QUEUE
+    new_system->coursesQueue = readFileCourses(coursesLines, numberCourses, new_system->coursesQueue);
 
     if (new_system->coursesQueue == NULL){
-
+        printf("ERROR: malloc failed in 120 line\n");
         return NULL;
     }
 
-    // NOT creating the FriendshipFunctionArr inside the courseQueue because we dont need it now (we need it only in the readEnrollment function)
+    // NOT creating the FriendshipFunctionArr inside the courseQueue because we dont need it now 
+    //(we need it only in the readEnrollment function)
 
 
     // creating the comparison function inside the courseQueue (argument of IsraeliQueueCreate)
-
     ComparisonFunction comp = &ItemsComparisonFunction;
 
     // creating the israeliQueue inside the courseQueue 
@@ -111,7 +141,6 @@ enrollmentSystem createEnrollmentSystem(FILE* students, FILE* courses, FILE* hac
         new_system->coursesQueue[i]->studentQueue = IsraeliQueueCreate(NULL, comp, FRIENDSHIP_THRESHOLD, RIVAL_THRESHOLD);
 
         if (new_system->coursesQueue[i]->studentQueue == NULL){
-
             return NULL;
         }
 
@@ -122,17 +151,14 @@ enrollmentSystem createEnrollmentSystem(FILE* students, FILE* courses, FILE* hac
     // creating the students array inside the enrollmentSystem
 
     new_system->students = (Student*)malloc(sizeof(Student)*(numberStudents+1));
-
     if (new_system->students == NULL){
-
         return NULL;
     }
-
     new_system->students[numberStudents] = NULL;
-
     new_system->numberStudents = numberStudents;
 
-    new_system->students = readFileStudent(new_system->students_file, numberStudents, new_system->students);
+
+    new_system->students = readFileStudent(studentsLines, numberStudents, new_system->students);
 
     if (new_system->students == NULL){
 
@@ -141,71 +167,51 @@ enrollmentSystem createEnrollmentSystem(FILE* students, FILE* courses, FILE* hac
 
     
     new_system->hackers = (Hacker*)malloc(sizeof(Hacker)*(numberHackers+1));
-
     if (new_system->hackers == NULL){
-
         return NULL;
     }
-
     new_system->hackers[numberHackers] = NULL;
-
     // malloc OK
     
-    new_system->hackers = readFileHackers(new_system->hackers_file, numberHackers,new_system->hackers ,new_system->students, numberStudents);
+    new_system->hackers = readFileHackers(hackersLine, numberHackers,new_system->hackers ,new_system->students, numberStudents);
 
     if (new_system->hackers == NULL){
 
-        printf("hackers NULL!");
         return NULL;
     }
 
     new_system->nameFlag = false;
 
 
-    PrintSystem(new_system);
     return new_system;
-     
  }
 
 
-
- CourseQueue* readFileCourses(FILE* coursesFile, int coursesNum, CourseQueue *coursesQueue){
-
-  if (coursesFile == NULL || coursesQueue == NULL) 
-  {
-    return NULL;
-  }
-
-  char *fileLine = NULL;
-  size_t len = 0; // size_t is an unsigned integer data type
+ CourseQueue* readFileCourses(char** coursesLines, int coursesNum, CourseQueue *coursesQueue){
 
 
-  if (coursesFile == NULL){
-
-    return NULL;
-}
-
-fseek(coursesFile, 0, SEEK_SET);
-
-for (int i = 0; i < coursesNum; i++){
-      
-    if (getline(&fileLine, &len, coursesFile) != -1){
-
-      coursesQueue[i] = CourseQueueCreate(fileLine);
-      fileLine = NULL;
-      len = 0;
-    
-    }else {
-
+    if (coursesLines == NULL || coursesQueue == NULL){
+        
         return NULL;
     }
+
+    for (int i = 0; i < coursesNum; i++){
     
-}
+        if (coursesLines[i] == NULL || strlen(coursesLines[i]) == 0){
 
+            return NULL;
+        }
 
+        coursesQueue[i] = CourseQueueCreate(coursesLines[i]);
 
-fseek(coursesFile, 0, SEEK_SET);
-return coursesQueue;
+        if (coursesQueue[i] == NULL){
+
+            return NULL;
+        }
+    
+    }
+
+    return coursesQueue;
 
 }
 
@@ -221,84 +227,55 @@ return coursesQueue;
 
  }
 
-Student* readFileStudent(FILE *studentFile, int studentNum, Student *students){
+Student* readFileStudent(char **studentLines, int studentNum, Student *students){
 
-    if (studentFile == NULL || students == NULL){
+
+    if (studentLines == NULL || students == NULL){
         
         return NULL;
     }
-
-    char *fileLine = NULL;
-    size_t len = 0;
-  
-    if (studentFile == NULL){
-
-        return NULL;
-    
-    }
-
-
-    fseek(studentFile, 0, SEEK_SET);
-
 
     for (int i = 0; i < studentNum; i++){
-        
-        if ((getline(&fileLine, &len, studentFile)) != -1){
 
-            students[i] = studentCreate(fileLine);
-            //printf("create Student function returns:\n");
-            //PrintStudent(students[i]);
-            fileLine = NULL;
-            len = 0;
-
-        }else{
+        if (studentLines[i] == NULL && strlen(studentLines[i]) == 0){
 
             return NULL;
+        }
 
-        } 
+        students[i] = studentCreate(studentLines[i]);
+        
+        if (students[i] == NULL){
+
+            return NULL;
+        }
 
     }
 
-    fseek(studentFile, 0, SEEK_SET);
     return students;
 
 }
 
-Hacker* readFileHackers(FILE *hackerFile, int hackerNum, Hacker *hackers, Student *students, int studentNum){
+Hacker* readFileHackers(char** hackerLines, int hackerNum, Hacker *hackers, Student *students, int studentNum){
 
-    if (hackerFile == NULL || hackers == NULL){
+    if (hackerLines == NULL || hackers == NULL){
 
         return NULL;
     }
 
-    char *fileLine = NULL;
-    size_t len = 0;
-
-    char *hackerLines[5] = {NULL};
-
-    fseek(hackerFile, 0, SEEK_SET);
+    char *hackerLinesSend[5] = {NULL};
 
     for (int i = 0; i < hackerNum; i++){ // hackerNum divided by 4 because each hacker has 4 lines
       
-        for (int j=0; j<4; j++){
+        for (int j = 0; j < 4; j++){
 
-            if ((getline(&fileLine, &len, hackerFile)) != -1){
-
-                hackerLines[j] = fileLine;
-                fileLine = NULL;
-                len = 0;
-
-            }else {
-                
-                return NULL;
-            }
-
+            hackerLinesSend[j] = hackerLines[i*4+j];
         } 
 
-        //printf("create hacker function returns:\n");
-        hackers[i] = HackerCreate(students,hackerLines, studentNum);
-        //PrintHacker(hackers[i]);
+        hackerLinesSend[4] = NULL;
 
+        //printf("create hacker function returns:\n");
+        hackers[i] = HackerCreate(students ,hackerLinesSend, studentNum);
+        //PrintHacker(hackers[i]);
         if (hackers[i] == NULL){
             
             return NULL;
@@ -306,60 +283,20 @@ Hacker* readFileHackers(FILE *hackerFile, int hackerNum, Hacker *hackers, Studen
 
     }
 
-
-    fseek(hackerFile, 0, SEEK_SET);
     return hackers;
 
  }
-
- int GetLinesNum(FILE *file){
-	
-	char *line = NULL;
-    size_t len = 0;
-    int read = 0;
-	int counter = 0; 
-
-    fseek(file, 0, SEEK_SET);
-
-    while ((read = getline(&line, &len, file)) != -1) {
-		
-		// exist line 
-
-        if (strlen(line) == 0){
-
-          break;
-
-        }
-
-
-        counter++;
-
-    }
-	
-    fseek(file, 0, SEEK_SET);
-    free(line);
-
-	return counter;
-}
-
 
 
 // The function reads a file describing the registration queues for courses. The file format: 
 //<Course Number> <Student IDs>* and will return an EnrollmentSystem structure representing the registration queues
 enrollmentSystem readEnrollment(enrollmentSystem sys, FILE* queues){
 
-    
     if (sys == NULL || queues == NULL){
 
         return NULL;
     }
 
-    printf("******************** system before adding students to courses ********************\n");
-    PrintSystem(sys);
-    printf("*********************************************************************************\n");
-
-    char *fileLine = NULL;
-    size_t len = 0;
 
     // this is for the israeliqueue for after the regular adding students to the course
     FriendshipFunction *FunctionArr = (FriendshipFunction*)malloc(sizeof(FunctionArr)*4);
@@ -384,63 +321,71 @@ enrollmentSystem readEnrollment(enrollmentSystem sys, FILE* queues){
     FunctionArr[3] = NULL;
     // end of friendship function array
 
-    fseek(queues, 0, SEEK_SET);
+    int NumLines = 0;
+    char** queuesLines = readFileLines(queues, &NumLines);
+    
+    for (int i = 0; i< NumLines; i++){
 
+        if (queuesLines[i] == NULL){
 
-    // now we will read the file and insert the students to the courses
-    while ((getline(&fileLine, &len, queues)) != -1){
+            return NULL;
+        }
 
-
-        char *temp = (char*)malloc((strlen(fileLine) + 1) * sizeof(char));
-        strcpy(temp, fileLine);
-
-        if (strlen(fileLine) == 0){
+        if (strlen(queuesLines[i]) == 0){
 
             break;
         }
 
-        char *courseID = strtok(fileLine, " ");
-        FixToken(courseID);
+        char *temp1 = (char*)malloc((strlen(queuesLines[i]) + 1) * sizeof(char));
+        char *temp2 = (char*)malloc((strlen(queuesLines[i]) * sizeof(char)));
 
-        //int i = 0;
-        
+        if (temp1 == NULL || temp2 == NULL){
+            return NULL;
+        }
+
+        strcpy(temp1, queuesLines[i]);
+        strcpy(temp2, queuesLines[i]);
+
+        char *courseID = strtok(temp1, " ");
+        trim(courseID);
+
+        for (int i = 0; i < sys->numberCourses; i++){
+
+            PrintCourse(sys->coursesQueue[i]);
+        }
+
         int indexOfCourse = returnIndexOfCourseByID(sys->coursesQueue, courseID, sys->numberCourses);
 
-
         if (indexOfCourse == -1){
-
+            
+            free(temp1);
+            free(temp2);
+            printf("error line 351 in hackenrollment\n");
             return NULL;
         }
-        
-        if (InsertStudentsToCourseQueue(sys->coursesQueue[indexOfCourse], temp, sys->students, sys->numberStudents) == NULL){
 
+        free(temp1);
+
+        if (InsertStudentsToCourseQueue(sys->coursesQueue[indexOfCourse], temp2, sys->students, sys->numberStudents) == NULL){
+            
+            free(temp2);
             return NULL;
         }
+
+        free(temp2);
 
         IsraeliQueueAddFriendshipMeasure(sys->coursesQueue[indexOfCourse]->studentQueue, FunctionArr[0]);
         IsraeliQueueAddFriendshipMeasure(sys->coursesQueue[indexOfCourse]->studentQueue, FunctionArr[1]);
         IsraeliQueueAddFriendshipMeasure(sys->coursesQueue[indexOfCourse]->studentQueue, FunctionArr[2]);
 
+    }
 
-        free(temp);
-        
-    } // finished reading the file and inserting the students to the courses
-
-
-    fseek(queues, 0, SEEK_SET);
-
-    printf("\n******************** system after adding students to courses ********************\n");
-    PrintSystem(sys);
-    printf("\n*********************************************************************************\n");
 
     return sys;
 }
 
 void hackEnrollment(enrollmentSystem sys, FILE* out){
 
-    printf("\n******************** system before hackenrollment courses ********************\n");
-    PrintSystem(sys);
-    printf("\n*********************************************************************************\n");
 
     if (sys == NULL || out == NULL){
 
@@ -450,17 +395,16 @@ void hackEnrollment(enrollmentSystem sys, FILE* out){
     int i = 0;
 
     for (; i < sys->numberHackers; i++){
+        
 
-        if (getHackerInToTheRequiredCourses(sys->coursesQueue,sys->hackers[i]->hacker ,sys->hackers[i]->wantedCoursesID,sys->hackers[i]->wantedCoursesNum, sys->numberCourses) == false){
+        if (getHackerInToTheRequiredCourses(sys->coursesQueue,sys->hackers[i] ,sys->hackers[i]->wantedCoursesID,sys->hackers[i]->wantedCoursesNum, sys->numberCourses) == false){
 
             return; // flag of error, need to print error message to the file and return everything to it's original state
         }
        
     }
 
-    //printf("\n******************** system after getting hacker to wanted courses ********************\n");
-    //PrintSystem(sys);
-    //printf("\n*********************************************************************************\n");
+
 
     // we have enqueue every hacker to the courses he wanted to
 
@@ -492,17 +436,14 @@ void hackEnrollment(enrollmentSystem sys, FILE* out){
 
     }
     
-    printf("\n******************** system after checking if hacker get course ********************\n");
-    PrintSystem(sys);
-    printf("\n*********************************************************************************\n");
-
+    
     i = 0; 
 
     for (; i < sys->numberHackers; i++){
     
         int compared = comparisonRequireToAccept(sys->hackers[i]->wantedCoursesNum, sys->hackers[i]->gotCourseNum);
-
-
+           
+    // if comperd = -2?
         if (compared == 0 || compared == -1){// then there is a problem
 
             if (compared == 0){
@@ -520,13 +461,13 @@ void hackEnrollment(enrollmentSystem sys, FILE* out){
     }
 
     for (i = 0; i < sys->numberCourses; i++){
-
+// why currentsize
         if (sys->coursesQueue[i]->currentSize > 0){
             
             fprintf(out, "%s ",sys->coursesQueue[i]->courseID);
 
             for (j = 0; j < sys->coursesQueue[i]->currentSize; j++){
-
+                // why 
                 Student student = ReturnStudentFromQueueByIndex(sys->coursesQueue[i], j);
 
                 fprintf(out, "%s ",student->studentID);
@@ -543,25 +484,26 @@ void hackEnrollment(enrollmentSystem sys, FILE* out){
 
 int returnIndexOfCourseByID(CourseQueue *courseQueue, char *courseID, int courseNum){
 
-    
     if (courseID == NULL || courseQueue == NULL || strlen(courseID) == 0){
-
+        
+        printf("returned -1 in returnIndexOfCourseByID because bad parameters, line 498\n");
         return -1;
     }
 
     for (int i = 0; i < courseNum; i++){
 
-        FixToken(courseQueue[i]->courseID);
-        FixToken(courseID);
+        trim(courseQueue[i]->courseID);
+        trim(courseID);
 
         if (strcmp(courseQueue[i]->courseID, courseID) == 0){
-
+            
             return i;
         }
 
         
     }
 
+    printf("returned -1 in returnIndexOfCourseByID because didn't find!\n");
     return -1;
 }
 
@@ -573,7 +515,7 @@ bool ifHackerGetCourse(CourseQueue courseQueue ,Hacker hacker){
         return false;
     }
 
-    if (courseQueue->currentSize <= 0){
+    if (IsraeliQueueSize(courseQueue->studentQueue) <= 0){
 
         return false;
     }
@@ -591,13 +533,13 @@ bool ifHackerGetCourse(CourseQueue courseQueue ,Hacker hacker){
 
     int searchingIndex = 0;
 
-    if (courseQueue->currentSize > courseQueue->courseSize){
+    if (IsraeliQueueSize(courseQueue->studentQueue) > courseQueue->courseSize){
 
         searchingIndex = courseQueue->courseSize;
 
-    }else { // courseQueue->currentSize <= courseQueue->courseSize
+    }else { // IsraeliQueueSize(courseQueue->studentQueue) <= courseQueue->courseSize
 
-        searchingIndex = courseQueue->currentSize;
+        searchingIndex = IsraeliQueueSize(courseQueue->studentQueue);
     }
 
     for (int i = 0; i < searchingIndex; i++){
@@ -622,34 +564,28 @@ bool ifHackerGetCourse(CourseQueue courseQueue ,Hacker hacker){
 
 }
 
-bool getHackerInToTheRequiredCourses(CourseQueue *courseQueue, Student hacker,char** wantedCourseID, int wantedCoursesNum, int coursesNum){
+bool getHackerInToTheRequiredCourses(CourseQueue *courseQueue, Hacker hacker,char** wantedCourseID, int wantedCoursesNum, int coursesNum){
   
    int coursePlace = 0;
    
-   for (int i = 0; i < wantedCoursesNum; i++){
+   for (int i = 0; i < wantedCoursesNum; i++){//runing on the wanted courses and enqueue the hacker.
     
-        coursePlace = returnIndexOfCourseByID(courseQueue, wantedCourseID[i],coursesNum);
-
+        coursePlace = returnIndexOfCourseByID(courseQueue, hacker->wantedCoursesID[i],coursesNum);
 
         if (coursePlace == -1){
             
-            
-            printf("******************************\n");
             printf("error in returnIndexOfCourseByID\n");
             return false;
         }
 
-        
-
         if (IsraeliQueueEnqueue(courseQueue[coursePlace]->studentQueue, hacker) != ISRAELIQUEUE_SUCCESS){
             
             
-            printf("******************************\n");
             printf("error in enqueue\n");
             return false;
         }
 
-        courseQueue[coursePlace]->currentSize++;
+        courseQueue[coursePlace]->currentSize++;//??
 
         // enqueue success
 
@@ -749,7 +685,10 @@ int upperToLower(int a){
 
 int returnDiffAsciiName(char* hackerName, char* studentName, bool capitalLetter){
 	
-    // check for error
+     if (hackerName == NULL || studentName == NULL) {
+        printf("Error: one or more input strings are NULL.\n");
+        return -1; 
+        }
 
 	int i = 0;
 	int diff = 0;
@@ -774,7 +713,7 @@ int returnDiffAsciiName(char* hackerName, char* studentName, bool capitalLetter)
     
     if (strlen(hackerName) < strlen(studentName)){
 
-        while (i <= strlen(studentName)){
+        while (i < strlen(studentName)){
 
             if (capitalLetter){
 
@@ -790,7 +729,7 @@ int returnDiffAsciiName(char* hackerName, char* studentName, bool capitalLetter)
 
     }else{
 
-        while (i <= strlen(hackerName)){
+        while (i < strlen(hackerName)){
              
             if (capitalLetter){
             
@@ -975,5 +914,79 @@ Student ReturnStudentFromQueueByIndex(CourseQueue courseQueue, int index){
 
     IsraeliQueueDestroy(temp);
     return student;
+}
+
+
+char* readLine(FILE* file){
+	
+    char* buffer = NULL;
+    int bufferSize = 0;
+    int length = 0;
+    int ch;
+
+    while ((ch = fgetc(file)) != EOF && ch != '\n') {
+        if (length + 1 >= bufferSize) {
+            bufferSize = (bufferSize == 0) ? 2 : bufferSize * 2;
+            char* newBuffer = realloc(buffer, bufferSize);
+            if (newBuffer == NULL) {
+                fprintf(stderr, "Memory allocation failed.\n");
+                free(buffer);
+                return NULL;
+            }
+            buffer = newBuffer;
+        }
+        buffer[length++] = ch;
+    }
+
+    if (length == 0 && ch == EOF) {
+        return NULL;  // Reached end of file
+    }
+
+    buffer = realloc(buffer, length + 1);  // Resize buffer to actual length
+    buffer[length] = '\0';
+    return buffer;
+}
+
+char** readFileLines(FILE* file, int* referenceToLineNumber){
+	
+    if (file == NULL) {
+		
+        printf("Failed to open the file.\n");
+        return NULL;
+    }
+
+    char* line = NULL;
+	
+	int counter = 0;
+	
+    while ((line = readLine(file)) != NULL){
+		
+		counter++;
+        free(line);
+    }
+	
+	*(referenceToLineNumber) = counter;
+	
+    fseek(file, 0, SEEK_SET);
+	
+	char** temp = (char**)malloc(sizeof(char*)*(counter+1));
+	
+	if (temp == NULL){
+		
+		return NULL;
+	}
+	
+	int i = 0;
+
+	while ((line = readLine(file)) != NULL){
+		
+		temp[i] = line;
+		i++;
+        
+    }
+	
+    fseek(file, 0, SEEK_SET);
+	return temp;
+		
 }
 
