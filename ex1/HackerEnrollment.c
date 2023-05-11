@@ -973,20 +973,7 @@ void destroyEnrollmentSystem(enrollmentSystem sys){
 
     // checking if the sys files need to be closed
 
-    if (sys->students_file != NULL){
 
-        fclose(sys->students_file);
-    }
-
-    if (sys->hackers_file != NULL){
-
-        fclose(sys->hackers_file);
-    }
-
-    if (sys->courses_file != NULL){
-
-        fclose(sys->courses_file);
-    }
 
     if (sys->coursesQueue != NULL){
 
