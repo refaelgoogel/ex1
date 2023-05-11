@@ -971,9 +971,23 @@ void destroyEnrollmentSystem(enrollmentSystem sys){
         return;
     }
 
-    // files already closed in main
+    // checking if the sys files need to be closed
 
-    
+    if (sys->students_file != NULL){
+
+        fclose(sys->students_file);
+    }
+
+    if (sys->hackers_file != NULL){
+
+        fclose(sys->hackers_file);
+    }
+
+    if (sys->courses_file != NULL){
+
+        fclose(sys->courses_file);
+    }
+
     if (sys->coursesQueue != NULL){
 
         for (int i = 0; i < sys->numberCourses; i++){
