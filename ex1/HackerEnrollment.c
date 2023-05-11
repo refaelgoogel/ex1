@@ -26,29 +26,30 @@ char** readFileLines(FILE* file, int* referenceToLineNumber);
 
 void PrintSystem(enrollmentSystem sys){
 
-    printf("\n\n");
-    printf("\n------------SYSTEM PRINT------------\n");
+    printf("\n\n\n------------SYSTEM PRINT------------\n");
 
-
-    printf("number of courses: %d\n",sys->numberCourses);
+    printf("%d courses in sys\n",sys->numberCourses);
 
     for (int i = 0; i<sys->numberCourses; i++){
 
         PrintCourse(sys->coursesQueue[i]);
     }
 
+    printf("\n%d students in sys:\n",sys->numberStudents);
+\
     for (int i = 0; i<sys->numberStudents; i++){
 
         PrintStudent(sys->students[i]);
     }
+
+    printf("\n%d hackers in sys:\n",sys->numberHackers);
 
     for (int i = 0; i< sys->numberHackers; i++){
 
         PrintHacker(sys->hackers[i]);
     }
 
-    printf("-------------END OF SYSTEM PRINT-------------\n");
-    printf("\n\n");
+    printf("-------------END OF SYSTEM PRINT-------------\n\n\n");
    
 }
 
@@ -181,13 +182,12 @@ enrollmentSystem createEnrollmentSystem(FILE* students, FILE* courses, FILE* hac
 
     new_system->nameFlag = false;
 
-    PrintSystem(new_system);
+    //PrintSystem(new_system);
     return new_system;
  }
 
 
  CourseQueue* readFileCourses(char** coursesLines, int coursesNum, CourseQueue *coursesQueue){
-
 
     if (coursesLines == NULL || coursesQueue == NULL){
         
@@ -272,6 +272,7 @@ Hacker* readFileHackers(char** hackerLines, int hackerNum, Hacker *hackers, Stud
 
         hackerLinesSend[4] = NULL;
 
+        
         //printf("create hacker function returns:\n");
         hackers[i] = HackerCreate(students ,hackerLinesSend, studentNum);
         //PrintHacker(hackers[i]);
@@ -295,7 +296,6 @@ enrollmentSystem readEnrollment(enrollmentSystem sys, FILE* queues){
 
         return NULL;
     }
-
 
     // this is for the israeliqueue for after the regular adding students to the course
     FriendshipFunction *FunctionArr = (FriendshipFunction*)malloc(sizeof(FunctionArr)*4);
@@ -322,40 +322,53 @@ enrollmentSystem readEnrollment(enrollmentSystem sys, FILE* queues){
 
     int NumLines = 0;
     char** queuesLines = readFileLines(queues, &NumLines);
+
     
     for (int i = 0; i< NumLines; i++){
 
         if (queuesLines[i] == NULL){
 
+            printf("line 331\n");
             return NULL;
         }
 
-        if (strlen(queuesLines[i]) == 0){
+        trim(queuesLines[i]);
 
+        if (strlen(queuesLines[i]) == 0){
+            
+            printf("line 337\n");
             break;
         }
 
         char *temp1 = (char*)malloc((strlen(queuesLines[i]) + 1) * sizeof(char));
-        char *temp2 = (char*)malloc((strlen(queuesLines[i]) * sizeof(char)));
+        char *temp2 = (char*)malloc((strlen(queuesLines[i]) + 1) * sizeof(char));
 
         if (temp1 == NULL || temp2 == NULL){
+
             return NULL;
         }
 
         strcpy(temp1, queuesLines[i]);
         strcpy(temp2, queuesLines[i]);
 
+        if (temp1 == NULL || temp2 == NULL){
+
+            return NULL;
+        }
+
         char *courseID = strtok(temp1, " ");
         trim(courseID);
 
-
+        
         int indexOfCourse = returnIndexOfCourseByID(sys->coursesQueue, courseID, sys->numberCourses);
 
+        printf("line 359\n");
+        
         if (indexOfCourse == -1){
             
             free(temp1);
             free(temp2);
-            printf("error line 351 in hackenrollment\n");
+            printf("line 365\n");
             return NULL;
         }
 
@@ -363,18 +376,32 @@ enrollmentSystem readEnrollment(enrollmentSystem sys, FILE* queues){
 
         if (InsertStudentsToCourseQueue(sys->coursesQueue[indexOfCourse], temp2, sys->students, sys->numberStudents) == NULL){
             
+            printf("line 373\n");
             free(temp2);
             return NULL;
         }
 
         free(temp2);
 
+        printf("line 379\n");
         IsraeliQueueAddFriendshipMeasure(sys->coursesQueue[indexOfCourse]->studentQueue, FunctionArr[0]);
         IsraeliQueueAddFriendshipMeasure(sys->coursesQueue[indexOfCourse]->studentQueue, FunctionArr[1]);
         IsraeliQueueAddFriendshipMeasure(sys->coursesQueue[indexOfCourse]->studentQueue, FunctionArr[2]);
-
+        printf("line 383\n");
     }
 
+
+    for (int i = 0; i<sys->numberCourses; i++){
+
+        if (sys->coursesQueue[i]->currentSize == 0){
+
+            IsraeliQueueAddFriendshipMeasure(sys->coursesQueue[i]->studentQueue, FunctionArr[0]);
+            IsraeliQueueAddFriendshipMeasure(sys->coursesQueue[i]->studentQueue, FunctionArr[1]);
+            IsraeliQueueAddFriendshipMeasure(sys->coursesQueue[i]->studentQueue, FunctionArr[2]);
+        
+        }
+
+    }
 
     return sys;
 }
@@ -398,7 +425,6 @@ void hackEnrollment(enrollmentSystem sys, FILE* out){
         }
        
     }
-
 
 
     // we have enqueue every hacker to the courses he wanted to
@@ -571,14 +597,14 @@ bool getHackerInToTheRequiredCourses(CourseQueue *courseQueue, Hacker hacker,cha
             return false;
         }
 
-        if (IsraeliQueueEnqueue(courseQueue[coursePlace]->studentQueue, hacker) != ISRAELIQUEUE_SUCCESS){
+        if (IsraeliQueueEnqueue(courseQueue[coursePlace]->studentQueue, hacker->hacker) != ISRAELIQUEUE_SUCCESS){
             
             
             printf("error in enqueue\n");
             return false;
         }
 
-        courseQueue[coursePlace]->currentSize++;//??
+        courseQueue[coursePlace]->currentSize = IsraeliQueueSize(courseQueue[coursePlace]->studentQueue);
 
         // enqueue success
 
@@ -590,7 +616,7 @@ bool getHackerInToTheRequiredCourses(CourseQueue *courseQueue, Hacker hacker,cha
 
 int friendshipMeasureByFile(void *hacker, void* student){
 
-    printf("by friendshipMeasureByFile: ");
+    //printf("by friendshipMeasureByFile: ");
 
     Student h = (Student)hacker;
     Student s = (Student)student;
@@ -606,7 +632,7 @@ int friendshipMeasureByFile(void *hacker, void* student){
 
             if (strcmp(h->friendsID[i] ,s->studentID) == 0){
 
-                printf("hacker %s is friend with student %s\n",h->studentID,s->studentID);
+                //printf("hacker %s is friend with student %s\n",h->studentID,s->studentID);
                 return FRIENDSHIP_THRESHOLD;
             }
         }
@@ -616,7 +642,7 @@ int friendshipMeasureByFile(void *hacker, void* student){
 
             if (strcmp(h->rivalsID[i],s->studentID) == 0){
 
-                printf("hacker %s is rival with student %s\n",h->studentID,s->studentID);
+                //printf("hacker %s is rival with student %s\n",h->studentID,s->studentID);
                 return RIVAL_THRESHOLD;
 
             }
@@ -630,7 +656,7 @@ int friendshipMeasureByFile(void *hacker, void* student){
 
             if (strcmp(s->friendsID[i],h->studentID) == 0){
 
-                printf("hacker %s is friend with student %s\n",s->studentID,h->studentID);
+                //printf("hacker %s is friend with student %s\n",s->studentID,h->studentID);
                 return FRIENDSHIP_THRESHOLD;
             }
         }
@@ -639,7 +665,7 @@ int friendshipMeasureByFile(void *hacker, void* student){
 
             if (strcmp(s->rivalsID[i] , h->studentID) == 0){
 
-                printf("hacker %s is rival with student %s\n",s->studentID,h->studentID);
+                //printf("hacker %s is rival with student %s\n",s->studentID,h->studentID);
                 return RIVAL_THRESHOLD;
 
             }
@@ -647,20 +673,20 @@ int friendshipMeasureByFile(void *hacker, void* student){
 
     }
 
-    printf("nor friends nor rivals!\n");
+    //printf("nor friends nor rivals!\n");
     return NEUTRAL_THRESHOLD;
 }    
 
 int friendshipMeasureByID(void *hacker, void* student){
 
-    printf("by friendshipMeasureByID: ");
+    //printf("by friendshipMeasureByID: ");
 
     Student h = (Student)hacker;
     Student s = (Student)student;
 
     int difInAbs = (abs((atoi(h->studentID)) - (atoi(s->studentID))));
 
-    printf("diff in Abs between %s and %s is %d\n",h->studentID,s->studentID,difInAbs);
+    //printf("diff in Abs between %s and %s is %d\n",h->studentID,s->studentID,difInAbs);
 
     return difInAbs;
 }
@@ -678,10 +704,10 @@ int upperToLower(int a){
 
 int returnDiffAsciiName(char* hackerName, char* studentName, bool capitalLetter){
 	
-     if (hackerName == NULL || studentName == NULL) {
+    if (hackerName == NULL || studentName == NULL) {
         printf("Error: one or more input strings are NULL.\n");
         return -1; 
-        }
+    }
 
 	int i = 0;
 	int diff = 0;
@@ -755,33 +781,32 @@ int min(int a, int b){
 
 int friendshipMeasureByName(void *hacker, void* student){
 
-    printf("by friendshipMeasureByName: ");
+    //printf("by friendshipMeasureByName: ");
     Student h = (Student)hacker;
     Student s = (Student)student;
     int diffName = returnDiffAsciiName(h->studentID, s->studentID, false);
     int diffSurname = returnDiffAsciiName(h->surname, s->surname, false);
 
-    printf("diff is  %d\n",diffName+diffSurname);
+    //printf("diff is  %d\n",diffName+diffSurname);
     return (diffName+diffSurname);  
 
 }
 
 int friendshipMeasureByNameWithFlag(void *hacker, void* student){
 
-    printf("by friendshipMeasureByNameWithFlag: ");
+    //printf("by friendshipMeasureByNameWithFlag: ");
     Student h = (Student)hacker;
     Student s = (Student)student;
     int diffName = returnDiffAsciiName(h->studentID, s->studentID, true);
     int diffSurname = returnDiffAsciiName(h->surname, s->surname, true);
 
-    printf("diff is %d\n",diffName+diffSurname);
-
+    //printf("diff is %d\n",diffName+diffSurname);
     return (diffName+diffSurname);  
 }
 
 int ItemsComparisonFunction(void *student1, void *student2){
 
-    printf("by ItemsComparisonFunction: ");
+  //printf("by ItemsComparisonFunction: ");
 
   if (student1 == NULL || student2 == NULL){
 
@@ -806,14 +831,14 @@ int ItemsComparisonFunction(void *student1, void *student2){
   bool ifCity = (strcmp(s1->city,s2->city) == 0);
   bool ifDepartment = (strcmp(s1->department,s2->department) == 0);
 
-  if (ifStudentID && ifTotalCredits && ifGPA && ifName && ifSurname && ifCity && ifDepartment){
+    if (ifStudentID && ifTotalCredits && ifGPA && ifName && ifSurname && ifCity && ifDepartment){
 
-    printf("items equal\n");
-    return 1; // equal
+        //printf("items equal\n");
+        return 1; // equal
 
-  }
+    }
 
-    printf("items not equal\n");
+    //printf("items not equal\n");
     return 0; // not equal
 
 }

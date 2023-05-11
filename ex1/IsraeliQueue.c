@@ -39,29 +39,24 @@ struct IsraeliQueue_t{
 
 void PrintIsraeliQueue(IsraeliQueue q){
 
-    printf("\n--------IsraeliQueue print---------\n");
+    printf("\n\n--------IsraeliQueue:--------\n\n");
 
 
-    printf("number of students inside IsraeliQueue is %d \n",q->size);
+    printf("students number: %d",q->size);
 
-    printf("these are the students inside IsraeliQueue: \n");
+    printf("\nstudents in queue: \n");
 
     for (int i = 0; i < q->size; i++){
         
+        printf("student number %d.", i+1);
         Student student = (Student)(q->array[i]->data);
         PrintStudent(student);
     }
 
-    printf("size_of_friendship_functions is: %d\n", q->size_of_friendship_functions);
-    printf("friendship threshold is %d\n", q->friendship_threshold);
-    printf("rivalry threshold is %d\n", q->rivalry_threshold);
-
+    printf("%d friendship_functions\n", q->size_of_friendship_functions);
+    printf("friendship threshold is %d and rivalry threshold is %d \n", q->friendship_threshold, q->rivalry_threshold);
     
-    printf("\n--------End of IsraeliQUeue Print---------\n");
-
 }
-
-
 
 IsraeliQueue IsraeliQueueCreate(FriendshipFunction *friendshipFunctions, ComparisonFunction comparisonFunction, int friendship_th, int rivalry_th){
 
@@ -309,7 +304,6 @@ IsraeliQueueError IsraeliQueueEnqueue(IsraeliQueue q, void *item){
         //printf("ERROR: IsraeliQueueEnqueue got NULL as a parameter!\n");
         return ISRAELIQUEUE_BAD_PARAM;
     }
-
 
     IsraeliQueueError error = ReallocateMoreSpace(q);
 

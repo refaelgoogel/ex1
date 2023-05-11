@@ -114,6 +114,8 @@ int main(int argc, char *argv[]){
     }
 
     enrollmentSystem enSystem = createEnrollmentSystem(studentsFile, coursesFile, hackersFile);
+    printf("enrollment created\n");    
+    PrintSystem(enSystem);
 
     if (enSystem == NULL){
 
@@ -123,12 +125,13 @@ int main(int argc, char *argv[]){
 
     SetNameFlag(enSystem, nameFlag);
 
-
     readEnrollment(enSystem, queuesFile);
     printf("enrollment read\n");
+    PrintSystem(enSystem);
     
     hackEnrollment(enSystem, targetFile);
     printf("enrollment hacked\n");
+    PrintSystem(enSystem);
 
     // close files 
 

@@ -14,6 +14,12 @@ CourseQueue CourseQueueCreate(char *fileLine){
 	new_CourseQueue->studentQueue = NULL;
 
 	char *temp = (char*)malloc(sizeof(char)*(strlen(fileLine)+1));
+	
+	if (temp == NULL){
+	
+		return NULL;
+	}
+
 	strcpy(temp, fileLine);
 
 	if (temp == NULL){
@@ -52,6 +58,7 @@ CourseQueue CourseQueueCreate(char *fileLine){
 
 CourseQueue InsertStudentsToCourseQueue(CourseQueue courseQueue, char *fileLine, Student *students, int studentNum){
 
+
 	if (courseQueue == NULL || fileLine == NULL || strlen(fileLine) == 0 || students == NULL) {
 		
 		return NULL;
@@ -64,10 +71,10 @@ CourseQueue InsertStudentsToCourseQueue(CourseQueue courseQueue, char *fileLine,
 	// now the token has the courseID
 
 	// let's get the students ID one by one 
-
 	bool foundStudent = false;
 
 	token = strtok(NULL, " "); // get the first student
+	printf("line 82 in InsertStudentsToCourseQueue\n");
 
 	while (token != NULL && strlen(token) > 0){ // running on all over the studentId
 		
@@ -78,27 +85,39 @@ CourseQueue InsertStudentsToCourseQueue(CourseQueue courseQueue, char *fileLine,
 		
 			if (strcmp(students[i]->studentID, token) == 0){ // we found the student
 
-				IsraeliQueueEnqueue(courseQueue->studentQueue, students[i]); // insert the student to the course queue
-				courseQueue->currentSize++;
+				IsraeliQueueError error = IsraeliQueueEnqueue(courseQueue->studentQueue, students[i]); // insert the student to the course queue
+				
+				if (error != ISRAELIQUEUE_SUCCESS){
+					
+					printf("line 97 in InsertStudentsToCourseQueue\n");
+					return NULL;
+				}
+
+				courseQueue->currentSize = IsraeliQueueSize(courseQueue->studentQueue); // update the current size of the course queue
 				foundStudent = true;
 				break;
 			}
 
 		}
 
+		printf("line 108 in InsertStudentsToCourseQueue\n");
 		// TODO - what if we didn't find the student?
 
 		if (!foundStudent){
-
+			
+			printf("line 113 in InsertStudentsToCourseQueue\n");
 			return NULL;
 		}
 
 		token = strtok(NULL, " ");
 	}
 
+	printf("line 120 in InsertStudentsToCourseQueue\n");
 	// now we have the courseQueue with all the students by order
 
 	// we finished to insert all the students to the course queue so we can now return the course queue
+
+	PrintCourse(courseQueue);
 
 	return courseQueue;
 }
@@ -114,14 +133,9 @@ void  CourseQueueDestroy(CourseQueue curseQueue){
 
 void PrintCourse(CourseQueue curseQueue){
 
-	printf("\n--------Course print---------\n");
 
-	printf("courseID: %s\n",curseQueue->courseID);
-	printf("course size: %d\n",curseQueue->courseSize);
-	printf("currentSize: %d\n",curseQueue->currentSize);
+	printf("\n-courseID: %s, Size: %d , CurrentSize: %d",curseQueue->courseID, curseQueue->courseSize, curseQueue->currentSize);
 	PrintIsraeliQueue(curseQueue->studentQueue);
-	
 
-	printf("\n-------- End of course---------\n");
 	
 }

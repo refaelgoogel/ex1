@@ -1,5 +1,6 @@
 #include "Hacker.h"
 #include "Student.h"
+#include <string.h>
 
 Hacker HackerCreate(Student *students,char **fileLine, int studentNum){
 
@@ -17,7 +18,7 @@ Hacker HackerCreate(Student *students,char **fileLine, int studentNum){
 
     char* first_line = fileLine[0]; 
 
-    new_hacker = FirstLineFunction(new_hacker, first_line, studentNum,students);
+    new_hacker = FirstLineFunction(new_hacker, first_line, studentNum , students);
 
     if (new_hacker->hacker == NULL){
 
@@ -28,7 +29,6 @@ Hacker HackerCreate(Student *students,char **fileLine, int studentNum){
     // le'ts get the wanted courses
     // count the number of wanted courses
 
-
     char *secondLine = fileLine[1];
 
     new_hacker = SecondLineFunction(new_hacker, secondLine);
@@ -38,13 +38,12 @@ Hacker HackerCreate(Student *students,char **fileLine, int studentNum){
         return NULL;
     }
 
-
     // now we have the wanted courses ID and the number of wanted courses
     // now let's find the hacker's friends
 
     char *thirdLine = fileLine[2];
 
-    new_hacker = ThirdLineFunction(new_hacker, thirdLine, students);
+    new_hacker = ThirdLineFunction(new_hacker, thirdLine, students, studentNum);
 
     if (new_hacker == NULL){
 
@@ -57,7 +56,7 @@ Hacker HackerCreate(Student *students,char **fileLine, int studentNum){
 
     char *fourthLine = fileLine[3];
 
-    new_hacker = FourthLineFunction(new_hacker, fourthLine, students);
+    new_hacker = FourthLineFunction(new_hacker, fourthLine, students, studentNum);
 
     if (new_hacker == NULL){
 
@@ -70,8 +69,6 @@ Hacker HackerCreate(Student *students,char **fileLine, int studentNum){
 
     // hacker created! 
 
-    printf("hacker created!\n");    
-    
     return new_hacker;
 
 }
@@ -91,6 +88,11 @@ Hacker FirstLineFunction(Hacker new_hacker ,char *firstLine, int studentNum, Stu
     }
 
     strcpy(CopyFirstLine, firstLine);
+
+    if (CopyFirstLine == NULL){
+
+        return NULL;
+    }
 
     char *token = strtok(CopyFirstLine, " ");
 		
@@ -124,11 +126,12 @@ Hacker FirstLineFunction(Hacker new_hacker ,char *firstLine, int studentNum, Stu
 
     free(CopyFirstLine);
     return new_hacker;
-
 }
 
+
 Hacker SecondLineFunction(Hacker new_hacker, char *SecondLine){
-    
+
+
     if (SecondLine == NULL || new_hacker == NULL){
 
         return NULL;
@@ -141,21 +144,34 @@ Hacker SecondLineFunction(Hacker new_hacker, char *SecondLine){
         return new_hacker;
     }
 
+    trim(SecondLine);
+
     char *CopySecondLine = (char*)malloc(sizeof(char)*(strlen(SecondLine)+1));
 
     if (CopySecondLine == NULL){
 
         return NULL;
     }
+
     strcpy(CopySecondLine, SecondLine);
 
+    if (CopySecondLine == NULL){
+
+        return NULL;
+    }
 
     int numberWantedCourses = GetNumberSafe(CopySecondLine);
 
-    if (numberWantedCourses == -1 || numberWantedCourses == 0){
+    if (numberWantedCourses == 0){
 
         new_hacker->wantedCoursesID = NULL;
         new_hacker->wantedCoursesNum = 0;
+        free(CopySecondLine);
+        return new_hacker;
+    }
+
+    if (numberWantedCourses == -1){
+
         free(CopySecondLine);
         return NULL;
     }
@@ -168,17 +184,19 @@ Hacker SecondLineFunction(Hacker new_hacker, char *SecondLine){
         return NULL;
     }
 
-    new_hacker->wantedCoursesID[numberWantedCourses] = NULL;
-    new_hacker->wantedCoursesNum = numberWantedCourses;
+    char *token = strtok(CopySecondLine, " ");
 
+    if (token == NULL){
+
+        free(CopySecondLine);
+        return NULL;
+    }
 
     int i = 0;
 
-    char *token = strtok(CopySecondLine, " ");
+    while (token != NULL){
 
-    while (token != NULL && strlen(token) > 0){
-
-        printf("token is: %s\n", token);
+        trim(token);
 
         new_hacker->wantedCoursesID[i] = (char*)malloc(sizeof(char)*(strlen(token)+1));
 
@@ -187,23 +205,28 @@ Hacker SecondLineFunction(Hacker new_hacker, char *SecondLine){
             free(CopySecondLine);
             return NULL;
         }
-        strcpy(new_hacker->wantedCoursesID[i], token);
-        printf("new_hacker->wantedCoursesID[i] is: %s\n", new_hacker->wantedCoursesID[i]);
 
+        strcpy(new_hacker->wantedCoursesID[i], token);
+
+        if (new_hacker->wantedCoursesID[i] == NULL){
+
+            free(CopySecondLine);
+            return NULL;
+        }
+   
         token = strtok(NULL, " ");
         i++;
     }
 
+    new_hacker->wantedCoursesID[i] = NULL;
+    new_hacker->wantedCoursesNum = i;
 
     free(CopySecondLine);
-
-    PrintHacker(new_hacker);
-
     return new_hacker;
-
 }
 
-Hacker ThirdLineFunction(Hacker new_hacker ,char *thirdLine, Student *students){
+
+Hacker ThirdLineFunction(Hacker new_hacker ,char *thirdLine, Student *students, int studentNum){
 
     if (thirdLine == NULL || new_hacker == NULL || students == NULL){
 
@@ -230,13 +253,20 @@ Hacker ThirdLineFunction(Hacker new_hacker ,char *thirdLine, Student *students){
 
     int numberFriends = GetNumberSafe(CopyThirdLine);
 
-    if (numberFriends == -1 || numberFriends == 0){
+    if (numberFriends == -1){
+
+        free(CopyThirdLine);
+        return NULL;
+    }
+
+    if (numberFriends == 0){
 
         new_hacker->friends = NULL;
         new_hacker->numberFriend = 0;
     
         new_hacker->hacker->friendsID = NULL;
         new_hacker->hacker->numberFriend = 0;
+
         free(CopyThirdLine);
         return new_hacker;
     }
@@ -257,14 +287,15 @@ Hacker ThirdLineFunction(Hacker new_hacker ,char *thirdLine, Student *students){
         return NULL;
     }
 
-    new_hacker->friends[numberFriends] = NULL;
-    new_hacker->hacker->friendsID[numberFriends] = NULL;
+    char *token = NULL;
 
-    new_hacker->numberFriend = numberFriends;
-    new_hacker->hacker->numberFriend = numberFriends;
+    token = strtok(CopyThirdLine, " ");
 
+    if (token == NULL){
 
-    char *token = strtok(CopyThirdLine, " ");
+        free(CopyThirdLine);
+        return NULL;
+    }
 
     bool flag = false;
     int i = 0;
@@ -277,24 +308,32 @@ Hacker ThirdLineFunction(Hacker new_hacker ,char *thirdLine, Student *students){
 
         flag = (strlen(token) == 0);
 
-        while (students[j] != NULL && strlen(token) > 0){
+        for (; j<studentNum; j++){
 
             if (strcmp(students[j]->studentID, token) == 0){
                 
                 new_hacker->friends[i] = students[j];
                 new_hacker->hacker->friendsID[i] = (char*)malloc(sizeof(char)*(strlen(students[j]->studentID)+1));
+
                 if (new_hacker->hacker->friendsID[i] == NULL){
 
                     free(CopyThirdLine);
                     return NULL;
                 }
+
                 strcpy(new_hacker->hacker->friendsID[i], students[j]->studentID);
+
+                if (new_hacker->hacker->friendsID[i] == NULL){
+
+                    free(CopyThirdLine);
+                    return NULL;
+                }
+
                 i++;
                 flag = true;
                 break;
             }
 
-            j++;
         }
 
         if (!flag){
@@ -307,14 +346,19 @@ Hacker ThirdLineFunction(Hacker new_hacker ,char *thirdLine, Student *students){
         token = strtok(NULL, " ");
     }
 
+    new_hacker->friends[i] = NULL;
+    new_hacker->hacker->friendsID[i] = NULL;
+    new_hacker->numberFriend = i;
+    new_hacker->hacker->numberFriend = i;
+
     free(CopyThirdLine);
     return new_hacker;
     
 }
 
-Hacker FourthLineFunction(Hacker new_hacker, char *fourthLine, Student* students){
+Hacker FourthLineFunction(Hacker new_hacker, char *fourthLine, Student* students, int studentNum){
 
-    if (fourthLine == NULL || new_hacker == NULL || students == NULL){
+if (fourthLine == NULL || new_hacker == NULL || students == NULL){
 
         return NULL;
     }
@@ -337,20 +381,27 @@ Hacker FourthLineFunction(Hacker new_hacker, char *fourthLine, Student* students
     }
     strcpy(CopyFourthLine, fourthLine);
 
-    int numberRival = GetNumberSafe(CopyFourthLine);
+    int numberRivals = GetNumberSafe(CopyFourthLine);
 
-    if (numberRival == -1 || numberRival == 0){
+    if (numberRivals == -1){
+
+        free(CopyFourthLine);
+        return NULL;
+    }
+
+    if (numberRivals == 0){
 
         new_hacker->rivals = NULL;
         new_hacker->numberRival = 0;
     
         new_hacker->hacker->rivalsID = NULL;
         new_hacker->hacker->numberRival = 0;
+
         free(CopyFourthLine);
         return new_hacker;
     }
 
-    new_hacker->rivals = (Student*)malloc(sizeof(Student)*(numberRival+1));
+    new_hacker->rivals = (Student*)malloc(sizeof(Student)*(numberRivals+1));
 
     if (new_hacker->rivals == NULL){
 
@@ -358,7 +409,7 @@ Hacker FourthLineFunction(Hacker new_hacker, char *fourthLine, Student* students
         return NULL;
     }
 
-    new_hacker->hacker->rivalsID = (char**)malloc(sizeof(char*)*(numberRival+1));
+    new_hacker->hacker->rivalsID = (char**)malloc(sizeof(char*)*(numberRivals+1));
 
     if (new_hacker->hacker->rivalsID == NULL){
 
@@ -366,14 +417,15 @@ Hacker FourthLineFunction(Hacker new_hacker, char *fourthLine, Student* students
         return NULL;
     }
 
-    new_hacker->rivals[numberRival] = NULL;
-    new_hacker->hacker->rivalsID[numberRival] = NULL;
+    char *token = NULL;
 
-    new_hacker->numberRival = numberRival;
-    new_hacker->hacker->numberRival = numberRival;
+    token = strtok(CopyFourthLine, " ");
 
+    if (token == NULL){
 
-    char *token = strtok(CopyFourthLine, " ");
+        free(CopyFourthLine);
+        return NULL;
+    }
 
     bool flag = false;
     int i = 0;
@@ -386,24 +438,32 @@ Hacker FourthLineFunction(Hacker new_hacker, char *fourthLine, Student* students
 
         flag = (strlen(token) == 0);
 
-        while (students[j] != NULL && strlen(token) > 0){
+        for (; j<studentNum; j++){
 
             if (strcmp(students[j]->studentID, token) == 0){
                 
                 new_hacker->rivals[i] = students[j];
                 new_hacker->hacker->rivalsID[i] = (char*)malloc(sizeof(char)*(strlen(students[j]->studentID)+1));
+
                 if (new_hacker->hacker->rivalsID[i] == NULL){
 
                     free(CopyFourthLine);
                     return NULL;
                 }
+
                 strcpy(new_hacker->hacker->rivalsID[i], students[j]->studentID);
+
+                if (new_hacker->hacker->rivalsID[i] == NULL){
+
+                    free(CopyFourthLine);
+                    return NULL;
+                }
+
                 i++;
                 flag = true;
                 break;
             }
 
-            j++;
         }
 
         if (!flag){
@@ -415,6 +475,11 @@ Hacker FourthLineFunction(Hacker new_hacker, char *fourthLine, Student* students
         flag = false;
         token = strtok(NULL, " ");
     }
+
+    new_hacker->rivals[i] = NULL;
+    new_hacker->hacker->rivalsID[i] = NULL;
+    new_hacker->numberRival = i;
+    new_hacker->hacker->numberRival = i;
 
     free(CopyFourthLine);
     return new_hacker;
@@ -448,8 +513,6 @@ int GetNumberSafe(char *line){
     }
 
     free(lineCopy);
-    free(line);
-
     return number;
 }
 
@@ -528,45 +591,35 @@ void FixToken(char *token){
 
 void PrintHacker(Hacker hacker){
 
-
-    printf("\n--------HackerPrint---------------------------\n");
-
-
+    printf("\n\n-------- Hacker %s ------------\n",hacker->hacker->studentID);
     PrintStudent(hacker->hacker);
 
 
-    printf("\n -------- hacker's friends:-----------------\n");
+    printf("\nfriends:\n");
 
     for (int i = 0; i<hacker->numberFriend; i++){
 
         PrintStudent(hacker->friends[i]);
     }
 
-    printf("\n ------ end of friends--------------------\n");
-
-
-    printf("\n ----------- rivals----------------------\n");
+    printf("\nrivals:\n");
 
     for (int i = 0; i<hacker->numberRival; i++){
 
         PrintStudent(hacker->rivals[i]);
     }
-    printf("\n ----------- end of rivals-----------------\n");
 
-    printf("\n ----------------- wanted courses number: %d --------- \n",hacker->wantedCoursesNum);
-
-    printf("\n --------  %s wanted courses: ----------------------------------\n",hacker->hacker->studentID);
+    printf("\nwant %d courses:\n",hacker->wantedCoursesNum);
 
     for (int i = 0; i<hacker->wantedCoursesNum; i++){
 
         printf("%d. %s\n" ,i+1,hacker->wantedCoursesID[i]);
     }
 
-    printf("\n ------------ end of wanted courses: ------------\n");
+    printf("\ncurrently courses got: %d\n",hacker->gotCourseNum);
 
-    printf("\n currently got from wanted: %d\n",hacker->gotCourseNum);
+    printf("\n--------EndHacker------------\n\n\n");
 
-    printf("\n--------End of Hacker----------------------\n");
 
 
 }
