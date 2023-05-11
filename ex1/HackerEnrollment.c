@@ -5,10 +5,11 @@
 #include <math.h>
 #include <string.h>
 
+#define FRIENDSHIP_THRESHOLD_FUNCTION 20
+#define RIVAL_THRESHOLD_FUNCTION -20
+#define NEUTRAL_THRESHOLD_FUNCTION 0
 #define FRIENDSHIP_THRESHOLD 20
-#define RIVAL_THRESHOLD -20
-#define NEUTRAL_THRESHOLD 0
-
+#define RIVAL_THRESHOLD 0
 
 int friendshipMeasureByFile(void *hacker, void* student);
 int friendshipMeasureByID(void *hacker, void* student);
@@ -182,7 +183,6 @@ enrollmentSystem createEnrollmentSystem(FILE* students, FILE* courses, FILE* hac
 
     new_system->nameFlag = false;
 
-    //PrintSystem(new_system);
     return new_system;
  }
 
@@ -273,9 +273,8 @@ Hacker* readFileHackers(char** hackerLines, int hackerNum, Hacker *hackers, Stud
         hackerLinesSend[4] = NULL;
 
         
-        //printf("create hacker function returns:\n");
         hackers[i] = HackerCreate(students ,hackerLinesSend, studentNum);
-        //PrintHacker(hackers[i]);
+
         if (hackers[i] == NULL){
             
             return NULL;
@@ -328,7 +327,6 @@ enrollmentSystem readEnrollment(enrollmentSystem sys, FILE* queues){
 
         if (queuesLines[i] == NULL){
 
-            printf("line 331\n");
             return NULL;
         }
 
@@ -336,7 +334,6 @@ enrollmentSystem readEnrollment(enrollmentSystem sys, FILE* queues){
 
         if (strlen(queuesLines[i]) == 0){
             
-            printf("line 337\n");
             break;
         }
 
@@ -362,13 +359,11 @@ enrollmentSystem readEnrollment(enrollmentSystem sys, FILE* queues){
         
         int indexOfCourse = returnIndexOfCourseByID(sys->coursesQueue, courseID, sys->numberCourses);
 
-        printf("line 359\n");
         
         if (indexOfCourse == -1){
             
             free(temp1);
             free(temp2);
-            printf("line 365\n");
             return NULL;
         }
 
@@ -376,18 +371,15 @@ enrollmentSystem readEnrollment(enrollmentSystem sys, FILE* queues){
 
         if (InsertStudentsToCourseQueue(sys->coursesQueue[indexOfCourse], temp2, sys->students, sys->numberStudents) == NULL){
             
-            printf("line 373\n");
             free(temp2);
             return NULL;
         }
 
         free(temp2);
 
-        printf("line 379\n");
         IsraeliQueueAddFriendshipMeasure(sys->coursesQueue[indexOfCourse]->studentQueue, FunctionArr[0]);
         IsraeliQueueAddFriendshipMeasure(sys->coursesQueue[indexOfCourse]->studentQueue, FunctionArr[1]);
         IsraeliQueueAddFriendshipMeasure(sys->coursesQueue[indexOfCourse]->studentQueue, FunctionArr[2]);
-        printf("line 383\n");
     }
 
 
@@ -444,6 +436,8 @@ void hackEnrollment(enrollmentSystem sys, FILE* out){
 
             index = returnIndexOfCourseByID(sys->coursesQueue, sys->hackers[i]->wantedCoursesID[j], sys->numberCourses);
 
+            
+
             if (ifHackerGetCourse(sys->coursesQueue[index] ,sys->hackers[i]) == true){
 
                 sys->hackers[i]->gotCourseNum++;
@@ -464,7 +458,7 @@ void hackEnrollment(enrollmentSystem sys, FILE* out){
     
         int compared = comparisonRequireToAccept(sys->hackers[i]->wantedCoursesNum, sys->hackers[i]->gotCourseNum);
            
-    // if comperd = -2?
+    
         if (compared == 0 || compared == -1){// then there is a problem
 
             if (compared == 0){
@@ -482,13 +476,13 @@ void hackEnrollment(enrollmentSystem sys, FILE* out){
     }
 
     for (i = 0; i < sys->numberCourses; i++){
-// why currentsize
+
         if (sys->coursesQueue[i]->currentSize > 0){
             
             fprintf(out, "%s ",sys->coursesQueue[i]->courseID);
 
             for (j = 0; j < sys->coursesQueue[i]->currentSize; j++){
-                // why 
+                
                 Student student = ReturnStudentFromQueueByIndex(sys->coursesQueue[i], j);
 
                 fprintf(out, "%s ",student->studentID);
@@ -548,8 +542,6 @@ bool ifHackerGetCourse(CourseQueue courseQueue ,Hacker hacker){
         return false;
     }
 
-
-
     int searchingIndex = 0;
 
     if (IsraeliQueueSize(courseQueue->studentQueue) > courseQueue->courseSize){
@@ -569,11 +561,7 @@ bool ifHackerGetCourse(CourseQueue courseQueue ,Hacker hacker){
         if (strcmp(student->studentID, hacker->hacker->studentID) == 0){
             
 
-            //printf("original and cloned queue after:\n");
-            //PrintIsraeliQueue(courseQueue->studentQueue);
-            //PrintIsraeliQueue(tempQueue);
             free(tempQueue);
-            //PrintIsraeliQueue(courseQueue->studentQueue);
             return true;
         }
     }
@@ -616,14 +604,13 @@ bool getHackerInToTheRequiredCourses(CourseQueue *courseQueue, Hacker hacker,cha
 
 int friendshipMeasureByFile(void *hacker, void* student){
 
-    //printf("by friendshipMeasureByFile: ");
 
     Student h = (Student)hacker;
     Student s = (Student)student;
 
     if (h->ifHacker == false && s->ifHacker == false){
 
-        return NEUTRAL_THRESHOLD;
+        return NEUTRAL_THRESHOLD_FUNCTION;
     }
 
     if (h->ifHacker == true){
@@ -632,8 +619,7 @@ int friendshipMeasureByFile(void *hacker, void* student){
 
             if (strcmp(h->friendsID[i] ,s->studentID) == 0){
 
-                //printf("hacker %s is friend with student %s\n",h->studentID,s->studentID);
-                return FRIENDSHIP_THRESHOLD;
+                return FRIENDSHIP_THRESHOLD_FUNCTION;
             }
         }
 
@@ -642,39 +628,14 @@ int friendshipMeasureByFile(void *hacker, void* student){
 
             if (strcmp(h->rivalsID[i],s->studentID) == 0){
 
-                //printf("hacker %s is rival with student %s\n",h->studentID,s->studentID);
-                return RIVAL_THRESHOLD;
+                return RIVAL_THRESHOLD_FUNCTION;
 
             }
         }
 
     }
 
-    if (s->ifHacker == true){
-
-        for (int i = 0; i < s->numberFriend; i++){
-
-            if (strcmp(s->friendsID[i],h->studentID) == 0){
-
-                //printf("hacker %s is friend with student %s\n",s->studentID,h->studentID);
-                return FRIENDSHIP_THRESHOLD;
-            }
-        }
-
-        for (int i = 0; i < s->numberRival; i++){
-
-            if (strcmp(s->rivalsID[i] , h->studentID) == 0){
-
-                //printf("hacker %s is rival with student %s\n",s->studentID,h->studentID);
-                return RIVAL_THRESHOLD;
-
-            }
-        }
-
-    }
-
-    //printf("nor friends nor rivals!\n");
-    return NEUTRAL_THRESHOLD;
+    return NEUTRAL_THRESHOLD_FUNCTION;
 }    
 
 int friendshipMeasureByID(void *hacker, void* student){
@@ -684,7 +645,12 @@ int friendshipMeasureByID(void *hacker, void* student){
     Student h = (Student)hacker;
     Student s = (Student)student;
 
-    int difInAbs = (abs((atoi(h->studentID)) - (atoi(s->studentID))));
+    int hID = atoi(h->studentID);
+    int sID = atoi(s->studentID);
+
+    int difID =  (hID - sID);
+
+    int difInAbs = abs(difID);
 
     //printf("diff in Abs between %s and %s is %d\n",h->studentID,s->studentID,difInAbs);
 
@@ -701,11 +667,10 @@ int upperToLower(int a){
     return a;
 }
 
-
 int returnDiffAsciiName(char* hackerName, char* studentName, bool capitalLetter){
 	
     if (hackerName == NULL || studentName == NULL) {
-        printf("Error: one or more input strings are NULL.\n");
+        
         return -1; 
     }
 
@@ -727,7 +692,9 @@ int returnDiffAsciiName(char* hackerName, char* studentName, bool capitalLetter)
             studentValueLetter = (int)studentName[i];
         }
 
-        diff = diff + abs(studentValueLetter-hackerValueLetter);
+        int AbsDif = abs(hackerValueLetter - studentValueLetter);
+
+        diff = diff + abs(AbsDif);
     }
     
     if (strlen(hackerName) < strlen(studentName)){
@@ -738,15 +705,18 @@ int returnDiffAsciiName(char* hackerName, char* studentName, bool capitalLetter)
 
                 studentValueLetter = upperToLower((int)studentName[i]);
                 diff = diff + studentValueLetter;
-                i++;
+
             }else{
 
                 diff = diff + (int)studentName[i];
-                i++;
+                
             }
+
+            i++;
+
         }
 
-    }else{
+    }else if (strlen(hackerName) > strlen(studentName)){
 
         while (i < strlen(hackerName)){
              
@@ -761,7 +731,6 @@ int returnDiffAsciiName(char* hackerName, char* studentName, bool capitalLetter)
 
             diff = diff + hackerValueLetter;
             i++;
-
         }
     }
 
@@ -784,10 +753,10 @@ int friendshipMeasureByName(void *hacker, void* student){
     //printf("by friendshipMeasureByName: ");
     Student h = (Student)hacker;
     Student s = (Student)student;
-    int diffName = returnDiffAsciiName(h->studentID, s->studentID, false);
+    int diffName = returnDiffAsciiName(h->name, s->name, false);
     int diffSurname = returnDiffAsciiName(h->surname, s->surname, false);
 
-    //printf("diff is  %d\n",diffName+diffSurname);
+    printf("diff is  %d\n",diffName+diffSurname);
     return (diffName+diffSurname);  
 
 }
@@ -797,10 +766,10 @@ int friendshipMeasureByNameWithFlag(void *hacker, void* student){
     //printf("by friendshipMeasureByNameWithFlag: ");
     Student h = (Student)hacker;
     Student s = (Student)student;
-    int diffName = returnDiffAsciiName(h->studentID, s->studentID, true);
+    int diffName = returnDiffAsciiName(h->name, s->name, true);
     int diffSurname = returnDiffAsciiName(h->surname, s->surname, true);
 
-    //printf("diff is %d\n",diffName+diffSurname);
+    printf("diff is %d\n",diffName+diffSurname);
     return (diffName+diffSurname);  
 }
 

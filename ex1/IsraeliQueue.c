@@ -67,7 +67,6 @@ IsraeliQueue IsraeliQueueCreate(FriendshipFunction *friendshipFunctions, Compari
         return NULL;
     }
 
-    //printf("IsraeliQueue malloced!\n");
 
 
     int i = 0;
@@ -81,7 +80,6 @@ IsraeliQueue IsraeliQueueCreate(FriendshipFunction *friendshipFunctions, Compari
 
     }
 
-    //printf("number of friendship functions is %d\n", i);
     	
     new_queue->friendship_functions = (FriendshipFunction*)malloc(sizeof(FriendshipFunction) * (i+1));
 
@@ -91,18 +89,15 @@ IsraeliQueue IsraeliQueueCreate(FriendshipFunction *friendshipFunctions, Compari
         return NULL;
     }
 
-    //printf("friendship functions malloced!\n");
 
     for (int j = 0; j<i; j++){
 
         new_queue-> friendship_functions[j] = friendshipFunctions[j];
-        //printf("function number %d has assigned to the new queue!\n", j+1);
     }
 
     new_queue->friendship_functions[i] = NULL;
     new_queue->size_of_friendship_functions = i;
 
-    //printf("struct -> size_of_friendship_functions is %d\n", new_queue->size_of_friendship_functions);
 
     if (comparisonFunction == NULL){
 
@@ -112,12 +107,9 @@ IsraeliQueue IsraeliQueueCreate(FriendshipFunction *friendshipFunctions, Compari
     }
 
     new_queue->comparison_function = comparisonFunction;
-    //printf("struct -> comparison_function assigned!\n", new_queue->comparison_function);
 
     new_queue->friendship_threshold = friendship_th;
-    //printf("struct -> friendship_threshold assigned and it's %d!\n", new_queue->friendship_threshold);
     new_queue->rivalry_threshold = rivalry_th;
-    //printf("struct -> rivalry_threshold assigned and it's %d!\n", new_queue->rivalry_threshold);
 
     new_queue->array = (Item*)malloc(sizeof(Item) * 10);
 
@@ -128,19 +120,14 @@ IsraeliQueue IsraeliQueueCreate(FriendshipFunction *friendshipFunctions, Compari
         return NULL;
     }
 
-    //printf("struct -> array malloced!\n");
 
     new_queue->size_of_allocation = 10;
-    //printf("struct -> size_of_allocation assigned and it's %d!\n", new_queue->size_of_allocation);
 
     new_queue->expend_base = 2;
-    //printf("struct -> expend_base assigned and it's %d!\n", new_queue->expend_base);
 
     new_queue->size = 0;
-    //printf("struct -> size assigned and it's %d!\n", new_queue->size);
 
 
-    //printf("IsraeliQueue created!\n");
     return new_queue;
 }
 
@@ -150,7 +137,6 @@ IsraeliQueue IsraeliQueueClone(IsraeliQueue q){
 
     if (q == NULL){
 
-        //printf("ERROR: IsraeliQueueClone got NULL as a parameter!\n");
         return NULL;
     }
 
@@ -161,13 +147,10 @@ IsraeliQueue IsraeliQueueClone(IsraeliQueue q){
         return NULL;
     }
 
-    //printf("cloned_queue created!\n");
 
     // adding to the new queue all the items from the old queue in the same order
     // with all the same properties
 
-    //printf("cloning the queue...\n");
-    //printf("size of the queue is %d\n", q->size);
 
     for (int i = 0; i < q->size; i++){
 
@@ -175,7 +158,6 @@ IsraeliQueue IsraeliQueueClone(IsraeliQueue q){
 
         if (error != ISRAELIQUEUE_SUCCESS){
 
-            //printf("ERROR: ReallocateMoreSpace in clone failed!\n");
             IsraeliQueueDestroy(cloned_queue);
             return NULL;
         }
@@ -188,12 +170,9 @@ IsraeliQueue IsraeliQueueClone(IsraeliQueue q){
             return NULL;
         }
 
-        //printf("item number %d cloned!\n", i+1);
 
         cloned_queue->array[i] = item;
-        //printf("item number %d assigned to the cloned queue!\n", i+1);
         cloned_queue->size++;
-        //printf("size of the cloned queue is %d now \n", cloned_queue->size);
 
         // copying all the properties of the old item to the new item
         cloned_queue->array[i]->passedFriends = q->array[i]->passedFriends;
@@ -201,14 +180,12 @@ IsraeliQueue IsraeliQueueClone(IsraeliQueue q){
         cloned_queue->array[i]->improvedPosition = q->array[i]->improvedPosition;
         cloned_queue->array[i]->merged = q->array[i]->merged;
 
-        //printf("item number %d properties copied!\n", i+1);
 
         // not freeing the item because it's being used in the new queue
         // when the new queue will be destroyed, the items will be destroyed as well
 
     }
 
-    //printf("queue cloned!\n");
     return cloned_queue;    
 }
 
@@ -223,19 +200,15 @@ void IsraeliQueueDestroy(IsraeliQueue q){
     }
 
     free(q->friendship_functions);
-    //printf("friendship_functions freed!\n");
 
     for (int i = 0; i<q->size; i++){
 
         ItemDestroy(q->array[i]);
-        //printf("item number %d destroyed!\n", i+1);
     }
 
     free(q->array);
-    //printf("array freed!\n");
 
     free(q);
-    //printf("queue destroyed!\n");
 
 }
 
@@ -246,7 +219,6 @@ int IfRival(IsraeliQueue q, Item item1, Item item2){
 
 	if (item1 == NULL || item2 == NULL || q == NULL){
 
-        //printf("ERROR: IfRival got NULL as a parameter!\n");
 		return 0;
 	}
 	
@@ -256,37 +228,29 @@ int IfRival(IsraeliQueue q, Item item1, Item item2){
 
     for (int i = 0; i < (q->size_of_friendship_functions); i++){
 
-        //printf("checking friendship by function number %d\n", i+1);
 
         if ((q->friendship_functions[i](item1->data, item2->data)) > (q->friendship_threshold)){
 
-            //printf("by function number %d the items (%d,%d) are friends because the function return %d and the friendship treshold is %d \n", i+1, *(int*)(item1->data), *(int*)(item2->data), q->friendship_functions[i](item1->data, item2->data), q->friendship_threshold);
             return 1; // 1 for friend
 			
         }else{
 			
 			rivalitySum += q->friendship_functions[i](item1->data, item2->data);
-            //printf("by function number %d the items (%d,%d) are NOT FRIENDS! because the function return %d and the friendship treshold is %d \n", i+1, *(int*)(item1->data), *(int*)(item2->data), q->friendship_functions[i](item1->data, item2->data), q->friendship_threshold);
-		    //printf("rivalitySum is %d\n", rivalitySum);
         }
 
     }
 
     // if we got here, the items are not freidns by all friendship functions
 
-    //printf("the items are not friends by all friendship functions!\n");
 
     rivalitySum = (rivalitySum / q->size_of_friendship_functions);
 
-    //printf("rivalitySum is %d\n", rivalitySum);
 
     if (rivalitySum < q->rivalry_threshold){
 
-        //printf("the items ARE ENEMIES by the rivalry threshold!\n");
         return -1; // negative mean enemy
     }
 
-    //printf("the items are natural!\n");
     return 0; // not friends and not enemies: nutrals
 
 }
@@ -301,7 +265,6 @@ IsraeliQueueError IsraeliQueueEnqueue(IsraeliQueue q, void *item){
 
 
     if (q == NULL){
-        //printf("ERROR: IsraeliQueueEnqueue got NULL as a parameter!\n");
         return ISRAELIQUEUE_BAD_PARAM;
     }
 
@@ -309,7 +272,6 @@ IsraeliQueueError IsraeliQueueEnqueue(IsraeliQueue q, void *item){
 
     if (error != ISRAELIQUEUE_SUCCESS){
 
-        //printf("ERROR: ReallocateMoreSpace in enqueue failed!\n");
         return ISRAELIQUEUE_ALLOC_FAILED;
     }
     
@@ -317,7 +279,6 @@ IsraeliQueueError IsraeliQueueEnqueue(IsraeliQueue q, void *item){
 
     if (new_item == NULL){
 
-        //printf("ERROR: ItemCreate in enqueue failed!\n");
         return ISRAELIQUEUE_ALLOC_FAILED;
     }
 
@@ -329,7 +290,6 @@ IsraeliQueueError IsraeliQueueEnqueue(IsraeliQueue q, void *item){
 
         q->array[q->size] = new_item;
         q->size++;
-        //printf("item number %d enqueued without friendships functions!\n", q->size);
         return ISRAELIQUEUE_SUCCESS;
     }
 	
@@ -341,47 +301,38 @@ IsraeliQueueError IsraeliQueueEnqueue(IsraeliQueue q, void *item){
 
         q->array[0] = new_item;
         q->size++;
-        //printf("item number 1 enqueued!\n");
         return ISRAELIQUEUE_SUCCESS;
     }
 
 	q->array[q->size] = new_item;
-	//printf("q->array[%d] = new_item;\n", q->size);
-
 
     int swapIndex = q->size;
 
-    //printf("checking if the item is friend of anyone...\n");
 	
     for (int j = 0; j < q->size; j++){
 
-        //printf("checking if the item is friend of item[%d]\n", j);
 
         int FurtherFriend = IfExsistFurtherFriend(q, q->size, j);
-        //printf("index of FurtherFriend is %d\n", FurtherFriend);
 
         if (FurtherFriend == -1){ // no friends have been found
 
             swapIndex = q->size;
-            //printf("no friends have been found from item[%d] to item[%d]!\n",q->size, j);
             break;
 
         }else{ // friend found
 
-            //printf("item[%d] is a friend of the enqueued item!, checking if it is blocked by enemies...\n", FurtherFriend);
             int EnemyBlock = IfEnemyBlocked(q, FurtherFriend, q->size);
 
             if (EnemyBlock == -1){ // no enemies have been found
 
                 swapIndex = FurtherFriend;
-                //printf("not blocked by enemies, item[%d] is the new swapIndex!\n", FurtherFriend+1);
+                printf("student %s is a friend with the students %s\n", (((Student)q->array[q->size]->data)->studentID), (((Student)q->array[FurtherFriend]->data)->studentID));
                 break;
 
             }else{// enemy found
 
                 q->array[EnemyBlock]->blockedRivals++;
                 printf("ENEMY++\n");
-                //printf("ENEMY++!\n");
                 j = EnemyBlock;
                 continue; // continue searching for other friend
             }
@@ -393,25 +344,21 @@ IsraeliQueueError IsraeliQueueEnqueue(IsraeliQueue q, void *item){
 
         q->array[swapIndex] = new_item;
         q->size++;
-        //printf("item enqueue to the end of the queue, has no friends that can help!\n");
+
         return ISRAELIQUEUE_SUCCESS;
 
     } else { // if we get in, the item is friend of someone 
 
-        //printf("item enqueue in the end of the queue, has friends that can help!\n");
         for (int i = q->size ; i > (swapIndex+1) ; i--){ // shift all items to the right
 
             //printf("shifting item[%d] to item[%d]\n", i-1, i);
             q->array[i] = q->array[i-1];
         } 
 
-        //printf("FRIEND++!\n");
-        //printf("item[%d] = new_item;\n", swapIndex+1);
         q->array[swapIndex+1] = new_item;
         q->size++;
         q->array[swapIndex]->passedFriends++;
 
-        //printf("size now is %d\n", q->size);
 
         return ISRAELIQUEUE_SUCCESS;
         
@@ -439,7 +386,6 @@ IsraeliQueueError IsraeliQueueAddFriendshipMeasure(IsraeliQueue q, FriendshipFun
     q->friendship_functions[q->size_of_friendship_functions+1] = NULL;
     q->size_of_friendship_functions++;
 
-    //printf("friendship function added successfully!\n");
 
     return ISRAELIQUEUE_SUCCESS;
 
@@ -450,7 +396,6 @@ IsraeliQueueError IsraeliQueueAddFriendshipMeasure(IsraeliQueue q, FriendshipFun
 IsraeliQueueError IsraeliQueueUpdateFriendshipThreshold(IsraeliQueue q, int newFriendshipThreshold){
 
         q->friendship_threshold = newFriendshipThreshold;
-        //printf("friendship threshold updated successfully!\n");
         return ISRAELIQUEUE_SUCCESS;
 
 }
@@ -460,7 +405,6 @@ IsraeliQueueError IsraeliQueueUpdateFriendshipThreshold(IsraeliQueue q, int newF
 IsraeliQueueError IsraeliQueueUpdateRivalryThreshold(IsraeliQueue q, int newRivalryThreshold){
 
         q->rivalry_threshold = newRivalryThreshold;
-        //printf("rivalry threshold updated successfully!\n");
         return ISRAELIQUEUE_SUCCESS;
 
 }
@@ -536,15 +480,12 @@ int IfEnemyBlocked(IsraeliQueue q, int friendIndex, int itemIndex){
         return -1;
     }
 
-    //printf("checking if there is enemies between the friend, item[%d], and item[%d]\n", friendIndex, itemIndex);
 
     for (int i = friendIndex; i < itemIndex; i++){
 
-        //printf("checking if item[%d] is a rival of item[%d]\n", i, itemIndex);
 
         if (IfRival(q, q->array[itemIndex], q->array[i]) == -1 && q->array[i]->blockedRivals < RIVAL_BLOCK_PASS_LIMIT){
 
-            //printf("item has blocking enemy! THE ENEMY IS[%d]!\n", i);
             return i;
         }
     }
@@ -567,15 +508,12 @@ int IfExsistFurtherFriend(IsraeliQueue q , int itemIndex, int StartingPosition){
         return -1;
     }
 
-    //printf("searching freind for item[%d] from item[%d]\n", itemIndex, StartingPosition);
 
     for (int i = StartingPosition; i < itemIndex; i++){
 
-        //printf("searching if friend of item[%d]\n",i);
 
         if (IfRival(q, q->array[itemIndex], q->array[i]) == 1 && (q->array[i]->passedFriends) < FRIENDS_PASS_LIMIT){
 
-            //printf("item[%d] is a friend of item[%d] that has more passing!\n", itemIndex,i);
             return i;
         }
     }
@@ -610,15 +548,12 @@ IsraeliQueue IsraeliQueueDequeueByIndex(IsraeliQueue q,int index){
 
 int FindIndex(IsraeliQueue q, Item item){
 
-    //printf("searching what item in q has the same value of the item->data = %p\n",item->data);
 
     for (int i = 0; i < q->size; i++){
 
-        //printf("item->data = %p VS %p = q->array[%d]->data\n", item->data, q->array[i]->data,i);
 
         if (q->array[i]->data == item->data){
 
-            //printf("they are equal!\n");
             return i;
 
         }
@@ -637,9 +572,7 @@ IsraeliQueueError IsraeliQueueImprovePositions(IsraeliQueue q){
 
     for (int i = ((q->size)-1); i >= 0; i--){
 
-        //printf("the index of %d in the queue is:",*(int*)qCopy->array[i]->data);
         indexCurrentItem = FindIndex(q, qCopy->array[i]);
-        //printf("returned index is %d\n",indexCurrentItem);
         q = IsraeliQueueDequeueByIndex(q, indexCurrentItem);
 
         IsraeliQueueError error = IsraeliQueueEnqueue(q, qCopy->array[i]->data);
@@ -675,7 +608,6 @@ IsraeliQueueError IsraeliQueueImprovePositions(IsraeliQueue q){
  * one enqueue an item, in the order defined by q_arr. In the event of any error during execution, return NULL.*/
 IsraeliQueue IsraeliQueueMerge(IsraeliQueue *qs ,ComparisonFunction f){
 
-    //(FriendshipFunction *friendshipFunctions, ComparisonFunction comparisonFunction, int friendship_th, int rivalry_th){
     
     if (qs == NULL || f == NULL){
         
@@ -698,7 +630,6 @@ IsraeliQueue IsraeliQueueMerge(IsraeliQueue *qs ,ComparisonFunction f){
 
     while (qs[i] != NULL){
 
-        //PrintIsraeliQueue(qs[i]);
         new_friendship_th += qs[i]->friendship_threshold;
         new_rivalry_th *= qs[i]->rivalry_threshold;
         i++;
@@ -711,7 +642,6 @@ IsraeliQueue IsraeliQueueMerge(IsraeliQueue *qs ,ComparisonFunction f){
 
     // creating new queue
 
-    //ptintf("creating new_queue\n");
     IsraeliQueue new_queue = IsraeliQueueCreate(friendshipFunctions,f,new_friendship_th,new_rivalry_th);
 
     free(friendshipFunctions); // friendshipFunctions is no longer needed because it has been copied to new_queue
@@ -721,7 +651,6 @@ IsraeliQueue IsraeliQueueMerge(IsraeliQueue *qs ,ComparisonFunction f){
         return NULL;
     }
 
-    //PrintIsraeliQueue(new_queue);
 
     // transfering items from qs to new_queue
 
@@ -731,7 +660,6 @@ IsraeliQueue IsraeliQueueMerge(IsraeliQueue *qs ,ComparisonFunction f){
 
         while (qs[i] != NULL){
 
-            //printf("queue number[%d] is not null\n", i);
 
             int j = 0;
 
@@ -744,30 +672,22 @@ IsraeliQueue IsraeliQueueMerge(IsraeliQueue *qs ,ComparisonFunction f){
 
             }
 
-            //printf("item[%d] in queue[%d] is the next to merge\n", j, i);
 
-            //printf("line 748\n");
 
             if (j == qs[i]->size){// all items in qs[i] have been merged, continue to next queue
 
-                //printf("oh oh - j=%d == qs[%d]->size == %d \n", j,i, qs[i]->size);
                 i++;
                 continue;
             }
 
-            //printf("line 757\n");
 
             qs[i]->array[j]->merged = true;
-            //printf("item[%d] in queue[%d] has been marked as merged\n", j, i);
 
-            //printf("the data is %d\n", *(int*)qs[i]->array[j]->data);
 
             IsraeliQueueError error = IsraeliQueueEnqueue(new_queue,qs[i]->array[j]->data);
-            //printf("enqueu to the new queue has been done\n");
 
             if (error == ISRAELIQUEUE_ALLOC_FAILED || error ==  ISRAELIQUEUE_BAD_PARAM){// if enqueue failed
 
-                //printf("Enqueue failed in IsraeliQueueMerge!\n");
                 return NULL;
             }
 
@@ -776,7 +696,6 @@ IsraeliQueue IsraeliQueueMerge(IsraeliQueue *qs ,ComparisonFunction f){
         
     }
 
-    //printf("GOT HERE!!!\n");
 
     MarkAsUnmerged(qs); // unmarking all items as merged
 
