@@ -3,20 +3,20 @@ FLAGS = -std=c99 -Wall -pedantic-errors -Werror -DNDEBUG
 END_FLAGS = -lm -g
 OBJS = CourseQueue.o Hacker.o HackerEnrollment.o IsraeliQueue.o Item.o main.o Student.o 
 EXEC = IsraeliQueue
-TESTFILES = C:\Users\refae\Desktop\mtm\ex1\ExampleTest\Tests\Tests\Test12\students.txt \
-	C:\Users\refae\Desktop\mtm\ex1\ExampleTest\Tests\Tests\Test12\courses.txt \
-	C:\Users\refae\Desktop\mtm\ex1\ExampleTest\Tests\Tests\Test12\hackers.txt \
-	C:\Users\refae\Desktop\mtm\ex1\ExampleTest\Tests\Tests\Test12\queues.txt \
-	C:\Users\refae\Desktop\mtm\ex1\ExampleTest\Tests\Tests\Test12\out.txt
+
 OPTIONAL_FLAG = -i
 
-#.PHONY: program clean
+BASE_PATH := /home/refael.hadad/Matam/ex1/ex1/ExampleTest/Tests/Tests/Test
+STUDENTS := /students.txt
+COURSES := /courses.txt
+HACKERS := /hackers.txt
+QUEUES := /queues.txt
+OUT := /out.txt
 
-#program: $(EXEC)
-#	.\$(EXEC) $(TESTFILES)
-	
-#clean: 
-#	rm -f $(OBJECTS) $(EXECUTABLE)
+TEST_RANGE := $(shell seq 1 16)
+
+.PHONY: program clean
+
 
 $(EXEC): $(OBJS)
 	$(CC) $(FLAGS) $(OBJS) -o $(EXEC) $(END_FLAGS)
@@ -41,3 +41,13 @@ main.o: main.c HackerEnrollment.h CourseQueue.h Student.h IsraeliQueue.h Hacker.
 
 Student.o: Student.c Student.h
 	$(CC) -c Student.c Student.h
+
+
+program: $(EXEC)
+	@for i in $(TEST_RANGE); do \
+		./$(EXEC) $(BASE_PATH)$$i$(STUDENTS) $(BASE_PATH)$$i$(COURSES) $(BASE_PATH)$$i$(HACKERS) $(BASE_PATH)$$i$(QUEUES) $(BASE_PATH)$$i$(OUT); \
+	done
+
+	
+clean: 
+	rm -f $(OBJECTS) $(EXECUTABLE)
