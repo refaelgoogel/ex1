@@ -30,7 +30,7 @@ typedef enum { ISRAELIQUEUE_SUCCESS, ISRAELIQUEUE_ALLOC_FAILED, ISRAELIQUEUE_BAD
  * to the new object. In case of failure, return NULL.*/
 
 
-void PrintIsraeliQueue(IsraeliQueue q);
+//void PrintIsraeliQueue(IsraeliQueue q); // used for debugging, prints the queue
 
 
 IsraeliQueue IsraeliQueueCreate(FriendshipFunction *, ComparisonFunction, int, int);

@@ -68,7 +68,6 @@ IsraeliQueue IsraeliQueueCreate(FriendshipFunction *friendshipFunctions, Compari
     }
 
 
-
     int i = 0;
 
     if (friendshipFunctions != NULL){
@@ -326,13 +325,11 @@ IsraeliQueueError IsraeliQueueEnqueue(IsraeliQueue q, void *item){
             if (EnemyBlock == -1){ // no enemies have been found
 
                 swapIndex = FurtherFriend;
-                printf("student %s is a friend with the students %s\n", (((Student)q->array[q->size]->data)->studentID), (((Student)q->array[FurtherFriend]->data)->studentID));
                 break;
 
             }else{// enemy found
 
                 q->array[EnemyBlock]->blockedRivals++;
-                printf("ENEMY++\n");
                 j = EnemyBlock;
                 continue; // continue searching for other friend
             }
@@ -351,7 +348,6 @@ IsraeliQueueError IsraeliQueueEnqueue(IsraeliQueue q, void *item){
 
         for (int i = q->size ; i > (swapIndex+1) ; i--){ // shift all items to the right
 
-            //printf("shifting item[%d] to item[%d]\n", i-1, i);
             q->array[i] = q->array[i-1];
         } 
 
@@ -518,7 +514,6 @@ int IfExsistFurtherFriend(IsraeliQueue q , int itemIndex, int StartingPosition){
         }
     }
 
-    //printf("no FurtherFriend has been found!\n");
     return -1; // no friend has been found
 
 }

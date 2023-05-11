@@ -24,6 +24,11 @@ int min(int a, int b);
 Student ReturnStudentFromQueueByIndex(CourseQueue courseQueue, int index);
 char* readLine(FILE* file);
 char** readFileLines(FILE* file, int* referenceToLineNumber);
+bool getHackerInToTheRequiredCourses(CourseQueue *courseQueue, Hacker hacker,char** wantedCourseID, int wantedCoursesNum, int coursesNum);
+bool ifHackerGetCourse(CourseQueue courseQueue ,Hacker h);
+int returnIndexOfCourseByID(CourseQueue *courseQueue, char *courseID, int coursesNum);
+int comparisonRequireToAccept(int requireCourses, int accepteCourses);
+
 
 void PrintSystem(enrollmentSystem sys){
 
@@ -62,7 +67,6 @@ enrollmentSystem createEnrollmentSystem(FILE* students, FILE* courses, FILE* hac
 
     if (new_system == NULL){
 
-        printf("ERROR: malloc failed in 62 line\n");
         return NULL;
     }
 
@@ -80,7 +84,6 @@ enrollmentSystem createEnrollmentSystem(FILE* students, FILE* courses, FILE* hac
     int numberStudents = 0;
     char **studentsLines = readFileLines(new_system->students_file, &numberStudents);
     if (studentsLines == NULL){
-        printf("ERROR: malloc failed in 80 line\n");
         return NULL;
     }
     new_system->numberStudents = numberStudents;
@@ -91,7 +94,6 @@ enrollmentSystem createEnrollmentSystem(FILE* students, FILE* courses, FILE* hac
 
     if (coursesLines == NULL){
 
-        printf("ERROR: malloc failed in 90 line\n");
         return NULL;
     }
     new_system->numberCourses = numberCourses;
@@ -103,7 +105,6 @@ enrollmentSystem createEnrollmentSystem(FILE* students, FILE* courses, FILE* hac
 
     if (hackersLine == NULL){
 
-        printf("ERROR: malloc failed in 100 line\n");
         return NULL;
     }
 
@@ -115,7 +116,6 @@ enrollmentSystem createEnrollmentSystem(FILE* students, FILE* courses, FILE* hac
     new_system->coursesQueue = (CourseQueue*)malloc(sizeof(CourseQueue)*(numberCourses+1));
     if (new_system->coursesQueue == NULL){
 
-        printf("ERROR: malloc failed in 111 line\n");
         return NULL;
     }
     new_system->coursesQueue[numberCourses] = NULL;
@@ -124,7 +124,6 @@ enrollmentSystem createEnrollmentSystem(FILE* students, FILE* courses, FILE* hac
     new_system->coursesQueue = readFileCourses(coursesLines, numberCourses, new_system->coursesQueue);
 
     if (new_system->coursesQueue == NULL){
-        printf("ERROR: malloc failed in 120 line\n");
         return NULL;
     }
 
@@ -501,7 +500,6 @@ int returnIndexOfCourseByID(CourseQueue *courseQueue, char *courseID, int course
 
     if (courseID == NULL || courseQueue == NULL || strlen(courseID) == 0){
         
-        printf("returned -1 in returnIndexOfCourseByID because bad parameters, line 498\n");
         return -1;
     }
 
@@ -518,7 +516,6 @@ int returnIndexOfCourseByID(CourseQueue *courseQueue, char *courseID, int course
         
     }
 
-    printf("returned -1 in returnIndexOfCourseByID because didn't find!\n");
     return -1;
 }
 
@@ -581,14 +578,12 @@ bool getHackerInToTheRequiredCourses(CourseQueue *courseQueue, Hacker hacker,cha
 
         if (coursePlace == -1){
             
-            printf("error in returnIndexOfCourseByID\n");
             return false;
         }
 
         if (IsraeliQueueEnqueue(courseQueue[coursePlace]->studentQueue, hacker->hacker) != ISRAELIQUEUE_SUCCESS){
             
             
-            printf("error in enqueue\n");
             return false;
         }
 
@@ -640,7 +635,6 @@ int friendshipMeasureByFile(void *hacker, void* student){
 
 int friendshipMeasureByID(void *hacker, void* student){
 
-    //printf("by friendshipMeasureByID: ");
 
     Student h = (Student)hacker;
     Student s = (Student)student;
@@ -652,7 +646,6 @@ int friendshipMeasureByID(void *hacker, void* student){
 
     int difInAbs = abs(difID);
 
-    //printf("diff in Abs between %s and %s is %d\n",h->studentID,s->studentID,difInAbs);
 
     return difInAbs;
 }
@@ -750,32 +743,27 @@ int min(int a, int b){
 
 int friendshipMeasureByName(void *hacker, void* student){
 
-    //printf("by friendshipMeasureByName: ");
     Student h = (Student)hacker;
     Student s = (Student)student;
     int diffName = returnDiffAsciiName(h->name, s->name, false);
     int diffSurname = returnDiffAsciiName(h->surname, s->surname, false);
 
-    printf("diff is  %d\n",diffName+diffSurname);
     return (diffName+diffSurname);  
 
 }
 
 int friendshipMeasureByNameWithFlag(void *hacker, void* student){
 
-    //printf("by friendshipMeasureByNameWithFlag: ");
     Student h = (Student)hacker;
     Student s = (Student)student;
     int diffName = returnDiffAsciiName(h->name, s->name, true);
     int diffSurname = returnDiffAsciiName(h->surname, s->surname, true);
 
-    printf("diff is %d\n",diffName+diffSurname);
     return (diffName+diffSurname);  
 }
 
 int ItemsComparisonFunction(void *student1, void *student2){
 
-  //printf("by ItemsComparisonFunction: ");
 
   if (student1 == NULL || student2 == NULL){
 
@@ -802,12 +790,10 @@ int ItemsComparisonFunction(void *student1, void *student2){
 
     if (ifStudentID && ifTotalCredits && ifGPA && ifName && ifSurname && ifCity && ifDepartment){
 
-        //printf("items equal\n");
         return 1; // equal
 
     }
 
-    //printf("items not equal\n");
     return 0; // not equal
 
 }
@@ -916,7 +902,7 @@ char* readLine(FILE* file){
             bufferSize = (bufferSize == 0) ? 2 : bufferSize * 2;
             char* newBuffer = realloc(buffer, bufferSize);
             if (newBuffer == NULL) {
-                fprintf(stderr, "Memory allocation failed.\n");
+                
                 free(buffer);
                 return NULL;
             }
@@ -938,7 +924,7 @@ char** readFileLines(FILE* file, int* referenceToLineNumber){
 	
     if (file == NULL) {
 		
-        printf("Failed to open the file.\n");
+        
         return NULL;
     }
 
@@ -975,5 +961,62 @@ char** readFileLines(FILE* file, int* referenceToLineNumber){
     fseek(file, 0, SEEK_SET);
 	return temp;
 		
+}
+
+
+void destroyEnrollmentSystem(enrollmentSystem sys){
+
+    if (sys == NULL){
+
+        return;
+    }
+
+    // files already closed in main
+
+    
+    if (sys->coursesQueue != NULL){
+
+        for (int i = 0; i < sys->numberCourses; i++){
+
+            if (sys->coursesQueue[i] != NULL){
+
+                CourseQueueDestroy(sys->coursesQueue[i]);
+            }
+        }
+
+        free(sys->coursesQueue);
+    }
+
+    if (sys->students != NULL){
+
+        for (int i = 0; i < sys->numberStudents; i++){
+
+            if (sys->students[i] != NULL){
+
+                studentDestroy(sys->students[i]);
+            }
+        }
+
+        free(sys->students);
+
+    }
+
+    if (sys->hackers != NULL){
+
+        for (int i = 0; i < sys->numberHackers; i++){
+
+            if (sys->hackers[i] != NULL){
+
+                HackerDestroy(sys->hackers[i]);
+            }
+        }
+
+        free(sys->hackers);
+
+    }
+
+    free(sys);
+    return;
+
 }
 

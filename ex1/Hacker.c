@@ -2,6 +2,14 @@
 #include "Student.h"
 #include <string.h>
 
+
+Hacker FirstLineFunction(Hacker new_hacker ,char *firstLine,int studentNum, Student *students);
+Hacker SecondLineFunction(Hacker new_hacker ,char *secondLine);
+Hacker ThirdLineFunction(Hacker new_hacker ,char *thirdLine, Student *students, int studentNum);
+Hacker FourthLineFunction(Hacker new_hacker ,char *fourthLine, Student *students, int studentNum);
+int GetNumberSafe(char *token);
+
+// this function creates a new hacker with the wanted courses, friends and rivals using the functions below
 Hacker HackerCreate(Student *students,char **fileLine, int studentNum){
 
     if (fileLine == NULL || students == NULL){
@@ -73,6 +81,7 @@ Hacker HackerCreate(Student *students,char **fileLine, int studentNum){
 
 }
 
+// this function gets hacker ID
 Hacker FirstLineFunction(Hacker new_hacker ,char *firstLine, int studentNum, Student *students){
 
     if (firstLine == NULL || new_hacker == NULL){
@@ -128,7 +137,7 @@ Hacker FirstLineFunction(Hacker new_hacker ,char *firstLine, int studentNum, Stu
     return new_hacker;
 }
 
-
+// this function gets the wanted courses
 Hacker SecondLineFunction(Hacker new_hacker, char *SecondLine){
 
 
@@ -225,7 +234,7 @@ Hacker SecondLineFunction(Hacker new_hacker, char *SecondLine){
     return new_hacker;
 }
 
-
+// this function gets the hacker's friends
 Hacker ThirdLineFunction(Hacker new_hacker ,char *thirdLine, Student *students, int studentNum){
 
     if (thirdLine == NULL || new_hacker == NULL || students == NULL){
@@ -356,6 +365,7 @@ Hacker ThirdLineFunction(Hacker new_hacker ,char *thirdLine, Student *students, 
     
 }
 
+// this function gets the hacker's rivals
 Hacker FourthLineFunction(Hacker new_hacker, char *fourthLine, Student* students, int studentNum){
 
 if (fourthLine == NULL || new_hacker == NULL || students == NULL){
@@ -485,6 +495,7 @@ if (fourthLine == NULL || new_hacker == NULL || students == NULL){
     return new_hacker;
 }
 
+// this function gets number of words in line
 int GetNumberSafe(char *line){
 
     if (line == NULL){
@@ -517,6 +528,7 @@ int GetNumberSafe(char *line){
 }
 
 
+// this function destroys the hacker
 void HackerDestroy(Hacker hacker){
 
     if (hacker == NULL){
@@ -548,7 +560,7 @@ void HackerDestroy(Hacker hacker){
     free(hacker);
 }
 
-
+// this function trim unwanted characters from the string
 void trim(char* str) {
 
 
@@ -572,23 +584,7 @@ void trim(char* str) {
 
 }
 
-void FixToken(char *token){
-
-    if (token == NULL || strlen(token) == 0){
-
-        return;
-    }
-
-    if (token[strlen(token)-1] == 10){
-
-        token[strlen(token)-1] = '\0';
-            
-    }else if (token[0] == 10){
-
-        token[0] = '\0';
-    }
-}
-
+// this function prints the hacker
 void PrintHacker(Hacker hacker){
 
     printf("\n\n-------- Hacker %s ------------\n",hacker->hacker->studentID);

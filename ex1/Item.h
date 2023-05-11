@@ -8,7 +8,7 @@
 #include <assert.h>
 #include <math.h>
 
-
+// this is the item type represent cell in IsraeliQueue
 typedef struct Item {
 
     void *data;
@@ -20,7 +20,10 @@ typedef struct Item {
     
 } *Item;
 
+
+// this function creates a new item, given the data
 Item ItemCreate(void *data);
+// this function destroys the item
 void ItemDestroy(Item item);
 
 #endif

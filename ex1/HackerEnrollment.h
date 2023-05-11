@@ -38,28 +38,8 @@ typedef enum { EnrollmentSystem_SUCCESS, EnrollmentSystem_ALLOC_FAILED, Enrollme
 enrollmentSystem createEnrollmentSystem(FILE* students, FILE* courses, FILE* hackers);
 enrollmentSystem readEnrollment(enrollmentSystem sys, FILE* queues); 
 void hackEnrollment(enrollmentSystem sys, FILE* out); 
-
-
-// maybe required to implement
-enrollmentSystemError AddingNewStudent(int id, int credits, double gpa, char* name, char* surname, char* city, char* department);
-bool ifStudentExist(int id); 
-bool ifCourseExist(int courseNumber);
-bool ifHackerGetCourse(CourseQueue courseQueue ,Hacker h);
-int returnIndexOfCourseByID(CourseQueue *courseQueue, char *courseID, int coursesNum);
-int comparisonRequireToAccept(int requireCourses, int accepteCourses);
-bool getHackerInToTheRequiredCourses(CourseQueue *courseQueue, Hacker hacker,char** wantedCourseID, int wantedCoursesNum, int coursesNum);
+void destroyEnrollmentSystem(enrollmentSystem sys);
 void SetNameFlag(enrollmentSystem sys, bool flag);
-
-int friendshipMeasureByFile(void *hacker, void* student);
-int friendshipMeasureByID(void *hacker, void* student);
-int friendshipMeasureByName(void *hacker, void* student);
-int friendshipMeasureByNameWithFlag(void *hacker, void* student);
-int ItemsComparisonFunction(void *student1, void *student2);
-CourseQueue* readFileCourses(char** coursesLines, int coursesNum, CourseQueue *coursesQueue);
-Student* readFileStudent(char** studentLines, int studentNum, Student *students);
-Hacker* readFileHackers(char** hackerLines, int hackerNum, Hacker *hackers, Student *students, int studentNum);
-int returnDiffAsciiName(char* hackerName, char* studentName, bool capitalLetter);
-int upperToLower(int a);
 void PrintSystem(enrollmentSystem sys);
 
 

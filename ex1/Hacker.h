@@ -24,13 +24,7 @@ typedef struct Hacker {
 } *Hacker;
 
 Hacker HackerCreate(Student *students,char **fileLine, int studentNum);
-int GetNumberSafe(char *token);
-Hacker FirstLineFunction(Hacker new_hacker ,char *firstLine,int studentNum, Student *students);
-Hacker SecondLineFunction(Hacker new_hacker ,char *secondLine);
-Hacker ThirdLineFunction(Hacker new_hacker ,char *thirdLine, Student *students, int studentNum);
-Hacker FourthLineFunction(Hacker new_hacker ,char *fourthLine, Student *students, int studentNum);
 void HackerDestroy(Hacker curseQueue);
-void FixToken(char *token);
 void trim(char* str);
 void PrintHacker(Hacker hacker);
 
