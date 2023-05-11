@@ -966,14 +966,13 @@ char** readFileLines(FILE* file, int* referenceToLineNumber){
 
 void destroyEnrollmentSystem(enrollmentSystem sys){
 
+
     if (sys == NULL){
 
         return;
     }
 
     // checking if the sys files need to be closed
-
-
 
     if (sys->coursesQueue != NULL){
 
@@ -988,7 +987,7 @@ void destroyEnrollmentSystem(enrollmentSystem sys){
         free(sys->coursesQueue);
     }
 
-    if (sys->students != NULL){
+    /*if (sys->students != NULL){
 
         for (int i = 0; i < sys->numberStudents; i++){
 
@@ -1014,9 +1013,11 @@ void destroyEnrollmentSystem(enrollmentSystem sys){
 
         free(sys->hackers);
 
-    }
+    }*/
 
     free(sys);
+
+    
     return;
 
 }
