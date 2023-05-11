@@ -181,6 +181,7 @@ int main(int argc, char *argv[]){
     int result5 = fclose(targetFile);
 
     if (result1 == EOF || result2 == EOF || result3 == EOF || result4 == EOF || result5 == EOF){
+        
 
         // error
         return 1;
