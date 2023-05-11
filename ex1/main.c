@@ -102,22 +102,67 @@ int main(int argc, char *argv[]){
     
 
     FILE *studentsFile = fopen(studentsPath, "r");
-    FILE *coursesFile = fopen(coursesPath, "r");
-    FILE *hackersFile = fopen(hackersPath, "r");
-    FILE *queuesFile = fopen(queuesPath, "r");
-    FILE *targetFile = fopen(targetPath, "w");
 
-    if (studentsFile == NULL || coursesFile == NULL || hackersFile == NULL || queuesFile == NULL || targetFile == NULL) {
+    if (studentsFile == NULL){
 
         // error
         return 1;
     }
+
+    FILE *coursesFile = fopen(coursesPath, "r");
+
+    if (coursesFile == NULL){
+
+        // error
+        fclose(studentsFile);
+        return 1;
+    }
+
+    FILE *hackersFile = fopen(hackersPath, "r");
+
+    if (hackersFile == NULL){
+
+        // error
+        fclose(studentsFile);
+        fclose(coursesFile);
+        return 1;
+    }
+
+
+    FILE *queuesFile = fopen(queuesPath, "r");
+
+    if (queuesFile == NULL){
+
+        // error
+        fclose(studentsFile);
+        fclose(coursesFile);
+        fclose(hackersFile);
+        return 1;
+    }
+
+    FILE *targetFile = fopen(targetPath, "w");
+
+    if (targetFile == NULL){
+
+        // error
+        fclose(studentsFile);
+        fclose(coursesFile);
+        fclose(hackersFile);
+        fclose(queuesFile);
+        return 1;
+    }
+
 
     enrollmentSystem enSystem = createEnrollmentSystem(studentsFile, coursesFile, hackersFile);
 
     if (enSystem == NULL){
 
         // error
+        fclose(studentsFile);
+        fclose(coursesFile);
+        fclose(hackersFile);
+        fclose(queuesFile);
+        fclose(targetFile);
         return 1;
     }
 
